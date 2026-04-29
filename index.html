@@ -182,19 +182,29 @@
         // Custom Node for Sankey Chart
         const CustomSankeyNode = ({ x, y, width, height, index, payload }) => {
             const isRightSide = x > 150;
+            const percent = payload.totalFlow ? Math.round((payload.value / payload.totalFlow) * 100) : 0;
             return (
                 <g>
                     <rect x={x} y={y} width={width} height={Math.max(height, 2)} fill={CHART_COLORS[index % CHART_COLORS.length]} rx="2" />
                     <text
                         textAnchor={isRightSide ? 'end' : 'start'}
                         x={isRightSide ? x - 6 : x + width + 6}
-                        y={y + height / 2}
+                        y={y + height / 2 - 6}
                         fontSize="12"
-                        fontWeight="500"
-                        fill="#334155"
-                        dominantBaseline="middle"
+                        fontWeight="600"
+                        fill="#1e293b"
                     >
-                        {payload.name}
+                        {payload.displayLabel || payload.name}
+                    </text>
+                    <text
+                        textAnchor={isRightSide ? 'end' : 'start'}
+                        x={isRightSide ? x - 6 : x + width + 6}
+                        y={y + height / 2 + 10}
+                        fontSize="11"
+                        fontWeight="400"
+                        fill="#64748b"
+                    >
+                        ${payload.value.toFixed(2)} ({percent}%)
                     </text>
                 </g>
             );
@@ -333,43 +343,57 @@
                 const nodes = [];
                 const links = [];
                 const nodeMap = new Map();
+                const totalFlow = Math.max(totalIncome, totalExpenses);
 
-                const addNode = (name) => {
-                    if (!nodeMap.has(name)) {
-                        nodeMap.set(name, nodes.length);
-                        nodes.push({ name });
+                const addNode = (id, displayLabel) => {
+                    if (!nodeMap.has(id)) {
+                        nodeMap.set(id, nodes.length);
+                        nodes.push({ name: id, displayLabel, totalFlow });
                     }
-                    return nodeMap.get(name);
+                    return nodeMap.get(id);
                 };
 
-                const budgetId = addNode('Total Budget ');
+                const budgetId = addNode('Total Budget', 'Total Budget');
 
-                if (totalIncome > 0) {
-                    const incomeId = addNode('Income ');
-                    links.push({ source: incomeId, target: budgetId, value: totalIncome });
-                }
+                // 1. Process Income Sources
+                const incomesByCategory = currentCycleTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((acc, t) => {
+                        const cat = t.category || 'Other Income';
+                        acc[cat] = (acc[cat] || 0) + t.amount;
+                        return acc;
+                    }, {});
+
+                Object.entries(incomesByCategory).forEach(([category, amount]) => {
+                    if (amount > 0) {
+                        const incId = addNode(`${category} (Income)`, category);
+                        links.push({ source: incId, target: budgetId, value: amount });
+                    }
+                });
 
                 if (netBalance < 0) {
-                    const deficitId = addNode('Overspend ');
+                    const deficitId = addNode('Overspend (Deficit)', 'Overspend / Deficit');
                     links.push({ source: deficitId, target: budgetId, value: Math.abs(netBalance) });
                 }
 
+                // 2. Process Expenses
                 const expensesByCategory = currentCycleTransactions
                     .filter(t => t.type === 'expense')
                     .reduce((acc, t) => {
-                        acc[t.category] = (acc[t.category] || 0) + t.amount;
+                        const cat = t.category || 'Other Expense';
+                        acc[cat] = (acc[cat] || 0) + t.amount;
                         return acc;
                     }, {});
 
                 Object.entries(expensesByCategory).forEach(([category, amount]) => {
                     if (amount > 0) {
-                        const catId = addNode(category);
-                        links.push({ source: budgetId, target: catId, value: amount });
+                        const expId = addNode(category, category);
+                        links.push({ source: budgetId, target: expId, value: amount });
                     }
                 });
 
                 if (netBalance > 0) {
-                    const savingsId = addNode('Savings ');
+                    const savingsId = addNode('Net Balance (Savings)', 'Net Balance / Savings');
                     links.push({ source: budgetId, target: savingsId, value: netBalance });
                 }
 
@@ -586,13 +610,17 @@ service cloud.firestore {
                         {/* Visualization */}
                         <Card className="p-6 lg:col-span-2 flex flex-col">
                             <h2 className="text-lg font-semibold mb-6 text-gray-900">Expense Allocation (Current Cycle)</h2>
-                            <div className="flex-grow w-full min-h-[300px]">
+                            <div 
+                                className="flex-grow w-full transition-all duration-300" 
+                                style={{ minHeight: sankeyData ? Math.max(400, sankeyData.nodes.length * 45) + 'px' : '400px' }}
+                            >
                                 {sankeyData ? (
                                     <ResponsiveContainer width="100%" height="100%">
                                         <Sankey
                                             data={sankeyData}
                                             node={<CustomSankeyNode />}
-                                            margin={{ top: 20, bottom: 20, left: 60, right: 60 }}
+                                            nodePadding={40}
+                                            margin={{ top: 20, bottom: 20, left: 140, right: 140 }}
                                             link={{ stroke: '#cbd5e1', strokeOpacity: 0.4 }}
                                         >
                                             <Tooltip 
