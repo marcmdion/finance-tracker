@@ -181,28 +181,43 @@
 
         // Custom Node for Sankey Chart
         const CustomSankeyNode = ({ x, y, width, height, index, payload }) => {
-            const isRightSide = x > 150;
             const percent = payload.totalFlow ? Math.round((payload.value / payload.totalFlow) * 100) : 0;
+            
+            // Safely identify Left vs Right nodes based on the data names we assigned
+            const pushLeft = payload.name.includes('(Income)') || payload.name.includes('(Deficit)');
+            
             return (
                 <g>
                     <rect x={x} y={y} width={width} height={Math.max(height, 2)} fill={CHART_COLORS[index % CHART_COLORS.length]} rx="2" />
+                    
+                    {/* Node Title */}
                     <text
-                        textAnchor={isRightSide ? 'end' : 'start'}
-                        x={isRightSide ? x - 6 : x + width + 6}
+                        textAnchor={pushLeft ? 'end' : 'start'}
+                        x={pushLeft ? x - 8 : x + width + 8}
                         y={y + height / 2 - 6}
                         fontSize="12"
                         fontWeight="600"
-                        fill="#1e293b"
+                        fill="#0f172a"
+                        stroke="#ffffff"
+                        strokeWidth="4"
+                        strokeLinejoin="round"
+                        paintOrder="stroke"
                     >
                         {payload.displayLabel || payload.name}
                     </text>
+                    
+                    {/* Dollar Value & Percentage */}
                     <text
-                        textAnchor={isRightSide ? 'end' : 'start'}
-                        x={isRightSide ? x - 6 : x + width + 6}
+                        textAnchor={pushLeft ? 'end' : 'start'}
+                        x={pushLeft ? x - 8 : x + width + 8}
                         y={y + height / 2 + 10}
                         fontSize="11"
-                        fontWeight="400"
-                        fill="#64748b"
+                        fontWeight="500"
+                        fill="#475569"
+                        stroke="#ffffff"
+                        strokeWidth="4"
+                        strokeLinejoin="round"
+                        paintOrder="stroke"
                     >
                         ${payload.value.toFixed(2)} ({percent}%)
                     </text>
@@ -523,12 +538,14 @@ service cloud.firestore {
                             </div>
                             <div className="text-3xl font-bold text-gray-900">${totalExpenses.toFixed(2)}</div>
                         </Card>
-                        <Card className="p-6 flex flex-col justify-between space-y-2 bg-gray-900 text-white border-transparent">
-                            <div className="flex items-center justify-between text-sm font-medium text-gray-300">
+                        <Card className="p-6 flex flex-col justify-between space-y-2">
+                            <div className="flex items-center justify-between text-sm font-medium text-gray-500">
                                 <span>Net Balance</span>
                                 <Icons.Wallet />
                             </div>
-                            <div className="text-3xl font-bold">${netBalance.toFixed(2)}</div>
+                            <div className={`text-3xl font-bold ${netBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                                ${netBalance.toFixed(2)}
+                            </div>
                         </Card>
                     </div>
 
