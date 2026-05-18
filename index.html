@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Strategist Dashboard</title>
+    <title>DION - Finance Strategist Dashboard</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -263,6 +263,7 @@
             const [detailsModal, setDetailsModal] = React.useState(null); // { category: string, type: string }
             
             const getTodayString = () => new Date().toISOString().split('T')[0];
+            const [lastUsedDate, setLastUsedDate] = React.useState(getTodayString());
             const initialFormState = { type: 'expense', amount: '', name: '', category: '', date: getTodayString() };
             const [formData, setFormData] = React.useState(initialFormState);
 
@@ -345,13 +346,14 @@
                         const docRef = doc(db, 'users', user.uid, 'transactions', editingId);
                         await updateDoc(docRef, txData);
                         setEditingId(null);
+                        setFormData({ ...initialFormState, date: lastUsedDate });
                     } else {
                         // Add new document
                         const txPath = collection(db, 'users', user.uid, 'transactions');
                         await addDoc(txPath, txData);
+                        // Preserve type and newly selected date for faster multi-entry
+                        setFormData({ ...initialFormState, type: formData.type, date: formData.date });
                     }
-                    
-                    setFormData({ ...initialFormState, date: getTodayString() });
                 } catch (error) {
                     console.error("Error saving transaction:", error);
                     if (error.code === 'permission-denied') setSyncError(true);
@@ -375,7 +377,7 @@
 
             const cancelEdit = () => {
                 setEditingId(null);
-                setFormData({ ...initialFormState, date: getTodayString() });
+                setFormData({ ...initialFormState, date: lastUsedDate });
             };
 
             const handleDelete = async (id) => {
@@ -691,7 +693,10 @@ service cloud.firestore {
                                             <input 
                                                 type="date" required
                                                 value={formData.date}
-                                                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                                onChange={(e) => {
+                                                    setFormData({...formData, date: e.target.value});
+                                                    if (!editingId) setLastUsedDate(e.target.value);
+                                                }}
                                                 className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 transition-all"
                                             />
                                         </div>
