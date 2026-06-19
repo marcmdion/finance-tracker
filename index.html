@@ -3,27 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DION - Finance Strategist Dashboard</title>
+    <title>Finance Strategist Dashboard</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel for JSX -->
+    <!-- Babel for JSX compilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Recharts & Dependencies -->
-    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-is@18/umd/react-is.production.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
 
-    <!-- Firebase Import Map -->
+    <!-- Modern ES Module Import Map -->
     <script type="importmap">
         {
             "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+                "react/jsx-dev-runtime": "https://esm.sh/react@18.2.0/jsx-dev-runtime",
+                "recharts": "https://esm.sh/recharts@2.10.3?bundle&deps=react@18.2.0,react-dom@18.2.0",
                 "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
                 "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
                 "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
@@ -66,6 +62,9 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
+        import React from "react";
+        import { createRoot } from "react-dom/client";
+        import { ResponsiveContainer, Sankey, Tooltip } from "recharts";
         import { initializeApp } from "firebase/app";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
@@ -89,8 +88,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Recharts Components (Updated for Sankey)
-        const { ResponsiveContainer, Sankey, Tooltip } = window.Recharts;
+        // Chart Colors
         const CHART_COLORS = [
             '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', 
             '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', 
@@ -1042,7 +1040,7 @@ service cloud.firestore {
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const root = createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
