@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import type { User } from "firebase/auth";
-import { db } from "@/lib/firebase";
+import { getFirebaseDb } from "@/lib/firebase";
 import { dateStringToTimestamp } from "@/lib/cycle-utils";
 import type { Transaction, TransactionFormData } from "@/lib/types";
 
@@ -25,7 +25,7 @@ export function useTransactions(user: User | null) {
     // Reset loading while waiting for the Firestore snapshot for this user.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Firestore subscription lifecycle
     setLoading(true);
-    const txPath = collection(db, "users", user.uid, "transactions");
+    const txPath = collection(getFirebaseDb(), "users", user.uid, "transactions");
 
     const unsubscribe = onSnapshot(
       txPath,
@@ -72,10 +72,10 @@ export function useTransactions(user: User | null) {
 
     try {
       if (editingId) {
-        const docRef = doc(db, "users", user.uid, "transactions", editingId);
+        const docRef = doc(getFirebaseDb(), "users", user.uid, "transactions", editingId);
         await updateDoc(docRef, txData);
       } else {
-        const txPath = collection(db, "users", user.uid, "transactions");
+        const txPath = collection(getFirebaseDb(), "users", user.uid, "transactions");
         await addDoc(txPath, txData);
       }
       return true;
@@ -96,7 +96,7 @@ export function useTransactions(user: User | null) {
     if (!user) return false;
 
     try {
-      const docRef = doc(db, "users", user.uid, "transactions", id);
+      const docRef = doc(getFirebaseDb(), "users", user.uid, "transactions", id);
       await deleteDoc(docRef);
       return true;
     } catch (error) {

@@ -1,6 +1,11 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+  initializeApp,
+  getApps,
+  getApp,
+  type FirebaseApp,
+} from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,10 +17,41 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-function getFirebaseApp() {
-  return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+let firebaseApp: FirebaseApp | undefined;
+let firebaseAuth: Auth | undefined;
+let firebaseDb: Firestore | undefined;
+
+function initFirebase() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  if (!firebaseApp) {
+    firebaseApp =
+      getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    firebaseAuth = getAuth(firebaseApp);
+    firebaseDb = getFirestore(firebaseApp);
+  }
+
+  return {
+    app: firebaseApp,
+    auth: firebaseAuth!,
+    db: firebaseDb!,
+  };
 }
 
-export const app = getFirebaseApp();
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export function getFirebaseAuth(): Auth {
+  const firebase = initFirebase();
+  if (!firebase) {
+    throw new Error("Firebase Auth is only available in the browser.");
+  }
+  return firebase.auth;
+}
+
+export function getFirebaseDb(): Firestore {
+  const firebase = initFirebase();
+  if (!firebase) {
+    throw new Error("Firestore is only available in the browser.");
+  }
+  return firebase.db;
+}

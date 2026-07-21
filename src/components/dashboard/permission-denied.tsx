@@ -2,7 +2,7 @@
 
 import { signOut } from "firebase/auth";
 import { AlertTriangle } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 import { FIRESTORE_RULES } from "@/lib/constants";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ export function PermissionDenied() {
             >
               I&apos;ve updated the rules, reload app
             </Button>
-            <Button variant="outline" onClick={() => signOut(auth)}>
+            <Button variant="outline" onClick={() => signOut(getFirebaseAuth())}>
               Logout
             </Button>
           </div>

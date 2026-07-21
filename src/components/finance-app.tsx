@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { useTransactions } from "@/hooks/use-transactions";
-import { auth } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 import {
   filterTransactionsByCycle,
   getCycleDates,
@@ -154,7 +154,7 @@ export function FinanceApp() {
           <Button
             variant="ghost"
             className="text-muted-foreground hover:text-destructive"
-            onClick={() => signOut(auth)}
+            onClick={() => signOut(getFirebaseAuth())}
           >
             Logout
           </Button>
