@@ -34,13 +34,14 @@ jobs:
         run: npm run build
         env:
           GITHUB_PAGES: "true"
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+          # Public Firebase client config (safe to embed — was in the original index.html)
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyBoXFpkoQvANb68vMpnksdrlnLkCSrpuDU
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: finance-tracker-27d5f.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: finance-tracker-27d5f
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: finance-tracker-27d5f.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "663637652591"
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:663637652591:web:964666791865943d6b899a
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: G-GCLL7V05G4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
