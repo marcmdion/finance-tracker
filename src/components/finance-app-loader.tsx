@@ -9,7 +9,7 @@ const FinanceApp = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
       </div>
     ),
   },

@@ -12,14 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -54,88 +47,91 @@ export function TransactionTable({
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <CardHeader className="border-b">
-          <CardTitle>Transactions (Current Cycle)</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
+      <div className="surface overflow-hidden">
+        <div className="border-b border-border/50 px-6 py-5">
+          <p className="label-caps mb-1">Current cycle</p>
+          <h2 className="text-lg font-medium tracking-[-0.02em]">Transactions</h2>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/40 hover:bg-transparent">
+              <TableHead className="label-caps h-11">Name</TableHead>
+              <TableHead className="label-caps h-11">Category</TableHead>
+              <TableHead className="label-caps h-11">Date</TableHead>
+              <TableHead className="label-caps h-11 text-right">Amount</TableHead>
+              <TableHead className="h-11 w-24" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.length === 0 ? (
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-24 text-right">Actions</TableHead>
+                <TableCell
+                  colSpan={5}
+                  className="py-12 text-center text-sm text-muted-foreground"
+                >
+                  No transactions in this cycle yet.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.length === 0 ? (
-                <TableRow>
+            ) : (
+              transactions.map((tx) => (
+                <TableRow key={tx.id} className="border-border/30">
+                  <TableCell className="font-medium">{tx.name}</TableCell>
+                  <TableCell>
+                    <span className="rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
+                      {tx.category}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground tabular-nums">
+                    {new Date(tx.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell
-                    colSpan={5}
-                    className="py-8 text-center text-muted-foreground"
+                    className={cn(
+                      "metric-value-sm text-right",
+                      tx.type === "income"
+                        ? "text-emerald-600/90"
+                        : "text-foreground/85",
+                    )}
                   >
-                    No transactions recorded in this cycle.
+                    {tx.type === "income" ? "+" : "−"}${tx.amount.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => onEdit(tx)}
+                        aria-label={`Edit ${tx.name}`}
+                        className="rounded-lg text-muted-foreground"
+                      >
+                        <Pencil className="size-3.5" strokeWidth={1.75} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setDeleteId(tx.id)}
+                        aria-label={`Delete ${tx.name}`}
+                        className="rounded-lg text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="size-3.5" strokeWidth={1.75} />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                transactions.map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell className="font-medium">{tx.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{tx.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(tx.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "text-right font-medium",
-                        tx.type === "income" && "text-green-600",
-                      )}
-                    >
-                      {tx.type === "income" ? "+" : "-"}${tx.amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => onEdit(tx)}
-                          aria-label={`Edit ${tx.name}`}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => setDeleteId(tx.id)}
-                          aria-label={`Delete ${tx.name}`}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <AlertDialog
         open={deleteId !== null}
         onOpenChange={(open) => !open && setDeleteId(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogTitle className="font-medium">Delete transaction?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The transaction will be permanently
-              removed from your records.
+              This cannot be undone. The entry will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

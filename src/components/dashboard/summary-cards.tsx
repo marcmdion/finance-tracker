@@ -1,12 +1,6 @@
 "use client";
 
-import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ArrowDownLeft, ArrowUpRight, CircleDot } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SummaryCardsProps {
@@ -15,55 +9,66 @@ interface SummaryCardsProps {
   netBalance: number;
 }
 
+const cards = [
+  {
+    key: "income",
+    label: "Income",
+    icon: ArrowUpRight,
+    tone: "text-emerald-600/90",
+    iconBg: "bg-emerald-500/8",
+  },
+  {
+    key: "expenses",
+    label: "Expenses",
+    icon: ArrowDownLeft,
+    tone: "text-rose-600/90",
+    iconBg: "bg-rose-500/8",
+  },
+  {
+    key: "net",
+    label: "Net balance",
+    icon: CircleDot,
+    tone: "text-foreground/80",
+    iconBg: "bg-primary/8",
+  },
+] as const;
+
 export function SummaryCards({
   totalIncome,
   totalExpenses,
   netBalance,
 }: SummaryCardsProps) {
+  const values = {
+    income: totalIncome,
+    expenses: totalExpenses,
+    net: netBalance,
+  };
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Income
-          </CardTitle>
-          <TrendingUp className="size-5 text-green-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">${totalIncome.toFixed(2)}</div>
-        </CardContent>
-      </Card>
+      {cards.map(({ key, label, icon: Icon, tone, iconBg }) => {
+        const value = values[key];
+        const isNegativeNet = key === "net" && value < 0;
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Expenses
-          </CardTitle>
-          <TrendingDown className="size-5 text-red-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">${totalExpenses.toFixed(2)}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Net Balance
-          </CardTitle>
-          <Wallet className="size-5" />
-        </CardHeader>
-        <CardContent>
-          <div
-            className={cn(
-              "text-3xl font-bold",
-              netBalance < 0 && "text-destructive",
-            )}
-          >
-            ${netBalance.toFixed(2)}
+        return (
+          <div key={key} className="surface px-5 py-5 sm:px-6 sm:py-6">
+            <div className="mb-5 flex items-center justify-between">
+              <span className="label-caps">{label}</span>
+              <div className={cn("rounded-full p-2", iconBg)}>
+                <Icon className={cn("size-3.5", tone)} strokeWidth={1.75} />
+              </div>
+            </div>
+            <div
+              className={cn(
+                "metric-value",
+                isNegativeNet && "text-destructive",
+              )}
+            >
+              ${Math.abs(value).toFixed(2)}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        );
+      })}
     </div>
   );
 }

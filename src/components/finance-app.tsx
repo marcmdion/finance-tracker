@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { CategoryDetailsDialog } from "@/components/dashboard/category-details-dialog";
 import { CycleNavigator } from "@/components/dashboard/cycle-navigator";
@@ -119,7 +119,7 @@ export function FinanceApp() {
   if (authLoading || (user && txLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
       </div>
     );
   }
@@ -133,17 +133,19 @@ export function FinanceApp() {
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
+    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <p className="label-caps">Personal finance</p>
+          <h1 className="text-[2rem] leading-none font-medium tracking-[-0.04em] sm:text-[2.35rem]">
             Finance Strategist
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Radical visibility into your real-time cash flow.
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+            Real-time visibility across your billing cycles.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+
+        <div className="flex flex-wrap items-center gap-3">
           <CycleNavigator
             cycleDates={cycleDates}
             cycleOffset={cycleOffset}
@@ -153,21 +155,27 @@ export function FinanceApp() {
           />
           <Button
             variant="ghost"
-            className="text-muted-foreground hover:text-destructive"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
             onClick={() => signOut(getFirebaseAuth())}
           >
-            Logout
+            <LogOut className="size-3.5" />
+            Sign out
           </Button>
         </div>
-      </div>
+      </header>
 
-      <Tabs defaultValue="dashboard">
-        <TabsList>
-          <TabsTrigger value="dashboard">Dashboard View</TabsTrigger>
-          <TabsTrigger value="summary">Summary Table</TabsTrigger>
+      <Tabs defaultValue="dashboard" className="gap-8">
+        <TabsList variant="line" className="h-auto w-full justify-start gap-6 bg-transparent p-0">
+          <TabsTrigger value="dashboard" className="px-0 pb-3 text-sm">
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="summary" className="px-0 pb-3 text-sm">
+            Summary
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="mt-6 space-y-6">
+        <TabsContent value="dashboard" className="space-y-8">
           <SummaryCards
             totalIncome={totalIncome}
             totalExpenses={totalExpenses}
@@ -194,7 +202,7 @@ export function FinanceApp() {
           />
         </TabsContent>
 
-        <TabsContent value="summary" className="mt-6">
+        <TabsContent value="summary">
           <SummaryTable
             summaryData={summaryData}
             onCategoryClick={setDetailsModal}

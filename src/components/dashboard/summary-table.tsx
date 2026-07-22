@@ -3,12 +3,6 @@
 import type { CategoryDetailsModal, SummaryData, TransactionType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Table,
   TableBody,
   TableCell,
@@ -37,7 +31,7 @@ export function SummaryTable({
         <TableRow>
           <TableCell
             colSpan={summaryData.cycles.length + 1}
-            className="py-4 text-center text-muted-foreground"
+            className="py-8 text-center text-sm text-muted-foreground"
           >
             {emptyMessage}
           </TableCell>
@@ -46,11 +40,11 @@ export function SummaryTable({
     }
 
     return entries.map(([category, amounts]) => (
-      <TableRow key={`${type}-${category}`}>
-        <TableCell className="sticky left-0 z-10 bg-background font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+      <TableRow key={`${type}-${category}`} className="border-border/30">
+        <TableCell className="sticky left-0 z-10 bg-card/95 font-medium backdrop-blur-sm">
           <Button
             variant="link"
-            className="h-auto p-0 font-medium"
+            className="h-auto p-0 font-medium text-foreground/85 hover:text-primary"
             onClick={() => onCategoryClick({ category, type })}
           >
             {category}
@@ -68,18 +62,21 @@ export function SummaryTable({
               : 0;
 
           return (
-            <TableCell key={key} className="text-right text-muted-foreground">
+            <TableCell
+              key={key}
+              className="text-right text-sm text-muted-foreground tabular-nums"
+            >
               {amount ? (
                 <span className="whitespace-nowrap">
                   ${amount.toFixed(2)}
                   {type === "expense" && (
-                    <span className="ml-1.5 text-[11px] font-medium text-muted-foreground/70">
-                      ({percentage}%)
+                    <span className="ml-1.5 text-[0.68rem] text-muted-foreground/60">
+                      {percentage}%
                     </span>
                   )}
                 </span>
               ) : (
-                "-"
+                "—"
               )}
             </TableCell>
           );
@@ -89,29 +86,30 @@ export function SummaryTable({
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="border-b bg-muted/30">
-        <CardTitle>Financial Summary by Cycle</CardTitle>
-      </CardHeader>
-      <CardContent className="overflow-x-auto p-0">
+    <div className="surface overflow-hidden">
+      <div className="border-b border-border/50 px-6 py-5">
+        <p className="label-caps mb-1">Historical view</p>
+        <h2 className="text-lg font-medium tracking-[-0.02em]">Summary by cycle</h2>
+      </div>
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="sticky left-0 z-10 bg-background shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+            <TableRow className="border-border/40 hover:bg-transparent">
+              <TableHead className="label-caps sticky left-0 z-10 h-11 bg-card/95 backdrop-blur-sm">
                 Category
               </TableHead>
               {summaryData.cycles.map(([key, label]) => (
-                <TableHead key={key} className="text-right">
+                <TableHead key={key} className="label-caps h-11 text-right">
                   {label}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow className="bg-muted/30">
+            <TableRow className="border-border/30 bg-muted/20 hover:bg-muted/20">
               <TableCell
                 colSpan={summaryData.cycles.length + 1}
-                className="text-xs font-semibold tracking-wider uppercase"
+                className="label-caps py-3"
               >
                 Income
               </TableCell>
@@ -121,24 +119,24 @@ export function SummaryTable({
               "income",
               "No income recorded.",
             )}
-            <TableRow className="border-b-2 bg-muted/50">
-              <TableCell className="sticky left-0 z-10 bg-muted font-bold shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                Total Income
+            <TableRow className="border-border/50 bg-muted/30 hover:bg-muted/30">
+              <TableCell className="sticky left-0 z-10 bg-muted/80 py-3 font-medium">
+                Total income
               </TableCell>
               {summaryData.cycles.map(([key]) => (
                 <TableCell
                   key={`tot-inc-${key}`}
-                  className="text-right font-bold text-green-700"
+                  className="metric-value-sm text-right text-emerald-600/90"
                 >
                   ${(summaryData.totals.income[key] || 0).toFixed(2)}
                 </TableCell>
               ))}
             </TableRow>
 
-            <TableRow className="bg-muted/30">
+            <TableRow className="border-border/30 bg-muted/20 hover:bg-muted/20">
               <TableCell
                 colSpan={summaryData.cycles.length + 1}
-                className="text-xs font-semibold tracking-wider uppercase"
+                className="label-caps py-3"
               >
                 Expenses
               </TableCell>
@@ -148,23 +146,23 @@ export function SummaryTable({
               "expense",
               "No expenses recorded.",
             )}
-            <TableRow className="border-b-2 bg-muted/50">
-              <TableCell className="sticky left-0 z-10 bg-muted font-bold shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                Total Expenses
+            <TableRow className="border-border/50 bg-muted/30 hover:bg-muted/30">
+              <TableCell className="sticky left-0 z-10 bg-muted/80 py-3 font-medium">
+                Total expenses
               </TableCell>
               {summaryData.cycles.map(([key]) => (
                 <TableCell
                   key={`tot-exp-${key}`}
-                  className="text-right font-bold text-red-700"
+                  className="metric-value-sm text-right text-rose-600/90"
                 >
                   ${(summaryData.totals.expense[key] || 0).toFixed(2)}
                 </TableCell>
               ))}
             </TableRow>
 
-            <TableRow className="bg-primary text-primary-foreground">
-              <TableCell className="sticky left-0 z-10 bg-primary font-bold shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
-                Net Balance
+            <TableRow className="border-border/50 bg-primary/90 hover:bg-primary/90">
+              <TableCell className="sticky left-0 z-10 bg-primary/90 py-4 font-medium text-primary-foreground">
+                Net balance
               </TableCell>
               {summaryData.cycles.map(([key]) => {
                 const net = summaryData.totals.net[key] || 0;
@@ -172,18 +170,19 @@ export function SummaryTable({
                   <TableCell
                     key={`net-${key}`}
                     className={cn(
-                      "text-right font-bold",
-                      net < 0 ? "text-red-300" : "text-green-300",
+                      "metric-value-sm text-right text-primary-foreground",
+                      net < 0 && "text-rose-200",
+                      net >= 0 && "text-emerald-100",
                     )}
                   >
-                    {net < 0 ? "-" : ""}${Math.abs(net).toFixed(2)}
+                    {net < 0 ? "−" : ""}${Math.abs(net).toFixed(2)}
                   </TableCell>
                 );
               })}
             </TableRow>
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

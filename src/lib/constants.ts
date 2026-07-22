@@ -19,18 +19,18 @@ export const DEFAULT_CATEGORIES = [
 ] as const;
 
 export const CHART_COLORS = [
-  "#ef4444",
-  "#f97316",
-  "#f59e0b",
-  "#84cc16",
-  "#22c55e",
-  "#14b8a6",
-  "#06b6d4",
-  "#3b82f6",
   "#6366f1",
   "#8b5cf6",
-  "#d946ef",
-  "#ec4899",
+  "#a78bfa",
+  "#38bdf8",
+  "#2dd4bf",
+  "#34d399",
+  "#fbbf24",
+  "#fb923c",
+  "#f87171",
+  "#fb7185",
+  "#c084fc",
+  "#818cf8",
 ] as const;
 
 export const FIRESTORE_RULES = `rules_version = '2';
