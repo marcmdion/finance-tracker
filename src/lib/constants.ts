@@ -36,8 +36,28 @@ export const CHART_COLORS = [
 export const FIRESTORE_RULES = `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/transactions/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /users/{userId}/transactions/{transactionId} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && isValidTransaction(request.resource.data);
+    }
+
+    function isValidTransaction(data) {
+      return data.type in ['income', 'expense']
+        && data.amountCents is int
+        && data.amountCents > 0
+        && data.amountCents < 1000000000
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 200
+        && data.category is string
+        && data.category.size() > 0
+        && data.category.size() <= 100
+        && data.transactionDate is string
+        && data.transactionDate.size() == 10
+        && data.recordedAt is int
+        && data.updatedAt is int;
     }
   }
 }`;

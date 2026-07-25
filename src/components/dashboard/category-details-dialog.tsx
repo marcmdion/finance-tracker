@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { formatMoney } from "@/lib/money-utils";
 
 interface CategoryDetailsDialogProps {
   modal: CategoryDetailsModal | null;
@@ -62,21 +62,18 @@ export function CategoryDetailsDialog({
               {filtered.map((tx) => (
                 <TableRow key={tx.id}>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {new Date(tx.createdAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </TableCell>
-                  <TableCell className="font-medium">{tx.name}</TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right font-medium whitespace-nowrap",
-                      tx.type === "income" && "text-green-600",
-                    )}
-                  >
-                    ${tx.amount.toFixed(2)}
-                  </TableCell>
+                          {new Date(tx.transactionDate).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </TableCell>
+                        <TableCell className="font-medium">{tx.name}</TableCell>
+                        <TableCell className="metric-value-sm text-right whitespace-nowrap">
+                          {formatMoney(tx.amountCents, {
+                            type: tx.type === "income" ? "income" : undefined,
+                          })}
+                        </TableCell>
                 </TableRow>
               ))}
             </TableBody>

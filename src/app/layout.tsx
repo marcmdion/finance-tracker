@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -20,8 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} h-full antialiased`}>
-      <body className="min-h-full font-sans">{children}</body>
+    <html lang="en" className={`${instrumentSans.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full font-sans">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          <Toaster richColors closeButton position="top-center" />
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

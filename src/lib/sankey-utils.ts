@@ -1,3 +1,4 @@
+import { centsToAmount } from "@/lib/money-utils";
 import type { SankeyData, Transaction } from "@/lib/types";
 
 export function buildSankeyData(
@@ -27,7 +28,7 @@ export function buildSankeyData(
     .filter((t) => t.type === "income")
     .reduce<Record<string, number>>((acc, t) => {
       const cat = t.category || "Other Income";
-      acc[cat] = (acc[cat] || 0) + t.amount;
+      acc[cat] = (acc[cat] || 0) + centsToAmount(t.amountCents);
       return acc;
     }, {});
 
@@ -51,7 +52,7 @@ export function buildSankeyData(
     .filter((t) => t.type === "expense")
     .reduce<Record<string, number>>((acc, t) => {
       const cat = t.category || "Other Expense";
-      acc[cat] = (acc[cat] || 0) + t.amount;
+      acc[cat] = (acc[cat] || 0) + centsToAmount(t.amountCents);
       return acc;
     }, {});
 
