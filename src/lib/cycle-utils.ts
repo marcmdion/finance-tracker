@@ -60,9 +60,10 @@ export function filterTransactionsByCycle(
 ): Transaction[] {
   const startTs = cycleDates.start.getTime();
   const endTs = cycleDates.end.getTime();
-  return transactions.filter(
-    (t) => t.createdAt >= startTs && t.createdAt <= endTs,
-  );
+  return transactions.filter((t) => {
+    const ts = dateStringToTimestamp(t.transactionDate);
+    return ts >= startTs && ts <= endTs;
+  });
 }
 
 export function formatDateStr(date: Date): string {

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const FinanceApp = dynamic(
   () => import("@/components/finance-app").then((mod) => mod.FinanceApp),
@@ -16,5 +17,9 @@ const FinanceApp = dynamic(
 );
 
 export function FinanceAppLoader() {
-  return <FinanceApp />;
+  return (
+    <ErrorBoundary>
+      <FinanceApp />
+    </ErrorBoundary>
+  );
 }

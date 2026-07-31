@@ -3,11 +3,12 @@ export type TransactionType = "income" | "expense";
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: number;
+  amountCents: number;
   name: string;
   category: string;
-  date: string;
+  transactionDate: string;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface TransactionFormData {
@@ -61,4 +62,9 @@ export interface SummaryData {
 export interface CategoryDetailsModal {
   category: string;
   type: TransactionType;
+}
+
+export interface CategorySummary {
+  name: string;
+  count: number;
 }

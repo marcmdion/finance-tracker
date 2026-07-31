@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { formatMoney } from "@/lib/money-utils";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -81,19 +81,15 @@ export function TransactionTable({
                       {tx.category}
                     </span>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground tabular-nums">
-                    {new Date(tx.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "metric-value-sm text-right",
-                      tx.type === "income"
-                        ? "text-emerald-600/90"
-                        : "text-foreground/85",
-                    )}
-                  >
-                    {tx.type === "income" ? "+" : "−"}${tx.amount.toFixed(2)}
-                  </TableCell>
+                    <TableCell className="text-sm text-muted-foreground tabular-nums">
+                      {new Date(tx.transactionDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="metric-value-sm text-right text-foreground/85">
+                      {formatMoney(tx.amountCents, {
+                        signed: true,
+                        type: tx.type,
+                      })}
+                    </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-0.5">
                       <Button

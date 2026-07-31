@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { DEFAULT_CATEGORIES } from "@/lib/constants";
 import { getTodayString } from "@/lib/cycle-utils";
+import { formDataAmountError } from "@/lib/money-utils";
 import type { Transaction, TransactionFormData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,8 @@ export function TransactionForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const amountError = formDataAmountError(formData);
+    if (amountError) return;
     if (!formData.amount || !formData.name || !formData.category || !formData.date) {
       return;
     }
@@ -228,14 +231,4 @@ export function TransactionForm({
       </form>
     </div>
   );
-}
-
-export function transactionToFormData(tx: Transaction): TransactionFormData {
-  return {
-    type: tx.type,
-    amount: tx.amount.toString(),
-    name: tx.name,
-    category: tx.category,
-    date: tx.date || getTodayString(),
-  };
 }

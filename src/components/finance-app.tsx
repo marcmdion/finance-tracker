@@ -2,30 +2,42 @@
 
 import { useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
-import { Loader2, LogOut } from "lucide-react";
+import { Download, Loader2, LogOut, Tags } from "lucide-react";
+import { toast } from "sonner";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { CategoryDetailsDialog } from "@/components/dashboard/category-details-dialog";
+import { CategoryManagerDialog } from "@/components/dashboard/category-manager-dialog";
 import { CycleNavigator } from "@/components/dashboard/cycle-navigator";
 import { PermissionDenied } from "@/components/dashboard/permission-denied";
 import { SankeyChart } from "@/components/dashboard/sankey-chart";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { SummaryTable } from "@/components/dashboard/summary-table";
-import {
-  TransactionForm,
-  transactionToFormData,
-} from "@/components/dashboard/transaction-form";
+import { TransactionForm } from "@/components/dashboard/transaction-form";
 import { TransactionTable } from "@/components/dashboard/transaction-table";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAllTransactions } from "@/hooks/use-all-transactions";
 import { useAuth } from "@/hooks/use-auth";
-import { useTransactions } from "@/hooks/use-transactions";
+import {
+  deleteTransaction,
+  saveTransaction,
+  useCycleTransactions,
+} from "@/hooks/use-cycle-transactions";
+import {
+  buildExportFilename,
+  downloadCsv,
+  exportTransactionsToCsv,
+} from "@/lib/csv-export";
 import { getFirebaseAuth } from "@/lib/firebase";
 import {
   filterTransactionsByCycle,
   getCycleDates,
 } from "@/lib/cycle-utils";
+import { centsToAmount } from "@/lib/money-utils";
 import { buildSankeyData } from "@/lib/sankey-utils";
 import { buildSummaryData } from "@/lib/summary-utils";
+import { transactionToFormData } from "@/lib/transaction-utils";
 import type {
   CategoryDetailsModal,
   Transaction,
@@ -35,12 +47,12 @@ import type {
 export function FinanceApp() {
   const { user, loading: authLoading } = useAuth();
   const {
-    transactions,
-    loading: txLoading,
+    transactions: allTransactions,
+    loading: allLoading,
     syncError,
-    saveTransaction,
-    deleteTransaction,
-  } = useTransactions(user);
+    renameCategory,
+    mergeCategories,
+  } = useAllTransactions(user);
 
   const [cycleOffset, setCycleOffset] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -50,26 +62,35 @@ export function FinanceApp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [detailsModal, setDetailsModal] =
     useState<CategoryDetailsModal | null>(null);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
   const cycleDates = useMemo(
     () => getCycleDates(cycleOffset),
     [cycleOffset],
   );
 
-  const currentCycleTransactions = useMemo(
-    () => filterTransactionsByCycle(transactions, cycleDates),
-    [transactions, cycleDates],
-  );
+  const { transactions: cycleTransactions, loading: cycleLoading } =
+    useCycleTransactions(user, cycleDates);
 
-  const totalIncome = currentCycleTransactions
+  const currentCycleTransactions = useMemo(() => {
+    if (cycleTransactions.length > 0) {
+      return cycleTransactions;
+    }
+    return filterTransactionsByCycle(allTransactions, cycleDates);
+  }, [allTransactions, cycleDates, cycleTransactions]);
+
+  const totalIncomeCents = currentCycleTransactions
     .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + t.amountCents, 0);
 
-  const totalExpenses = currentCycleTransactions
+  const totalExpensesCents = currentCycleTransactions
     .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + t.amountCents, 0);
 
-  const netBalance = totalIncome - totalExpenses;
+  const netBalanceCents = totalIncomeCents - totalExpensesCents;
+  const totalIncome = centsToAmount(totalIncomeCents);
+  const totalExpenses = centsToAmount(totalExpensesCents);
+  const netBalance = centsToAmount(netBalanceCents);
 
   const sankeyData = useMemo(
     () =>
@@ -83,19 +104,28 @@ export function FinanceApp() {
   );
 
   const summaryData = useMemo(
-    () => buildSummaryData(transactions),
-    [transactions],
+    () => buildSummaryData(allTransactions),
+    [allTransactions],
   );
 
   const handleSubmit = async (formData: TransactionFormData) => {
+    if (!user) return;
+
     setIsSubmitting(true);
-    const success = await saveTransaction(formData, editingId);
+    const existing = editingId
+      ? allTransactions.find((transaction) => transaction.id === editingId)
+      : undefined;
+    const result = await saveTransaction(user, formData, editingId, existing);
     setIsSubmitting(false);
 
-    if (success) {
+    if (result.ok) {
+      toast.success(editingId ? "Transaction updated" : "Transaction added");
       setEditingId(null);
       setEditFormData(null);
+      return;
     }
+
+    toast.error(result.message);
   };
 
   const handleEdit = (tx: Transaction) => {
@@ -110,13 +140,32 @@ export function FinanceApp() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteTransaction(id);
-    if (editingId === id) {
-      handleCancelEdit();
+    if (!user) return;
+
+    const result = await deleteTransaction(user, id);
+    if (result.ok) {
+      toast.success("Transaction deleted");
+      if (editingId === id) {
+        handleCancelEdit();
+      }
+      return;
     }
+
+    toast.error(result.message);
   };
 
-  if (authLoading || (user && txLoading)) {
+  const handleExport = () => {
+    if (allTransactions.length === 0) {
+      toast.info("No transactions to export yet.");
+      return;
+    }
+
+    const csv = exportTransactionsToCsv(allTransactions);
+    downloadCsv(buildExportFilename(), csv);
+    toast.success("CSV export downloaded");
+  };
+
+  if (authLoading || (user && allLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
@@ -157,6 +206,25 @@ export function FinanceApp() {
             variant="ghost"
             size="sm"
             className="text-muted-foreground hover:text-foreground"
+            onClick={() => setCategoryManagerOpen(true)}
+          >
+            <Tags className="size-3.5" />
+            Categories
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={handleExport}
+          >
+            <Download className="size-3.5" />
+            Export CSV
+          </Button>
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
             onClick={() => signOut(getFirebaseAuth())}
           >
             <LogOut className="size-3.5" />
@@ -185,7 +253,7 @@ export function FinanceApp() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <TransactionForm
               key={editingId ?? "new"}
-              transactions={transactions}
+              transactions={allTransactions}
               editingId={editingId}
               isSubmitting={isSubmitting}
               initialFormData={editFormData ?? undefined}
@@ -195,11 +263,17 @@ export function FinanceApp() {
             <SankeyChart sankeyData={sankeyData} />
           </div>
 
-          <TransactionTable
-            transactions={currentCycleTransactions}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {cycleLoading ? (
+            <div className="surface flex items-center justify-center py-16">
+              <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
+            </div>
+          ) : (
+            <TransactionTable
+              transactions={currentCycleTransactions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="summary">
@@ -212,8 +286,16 @@ export function FinanceApp() {
 
       <CategoryDetailsDialog
         modal={detailsModal}
-        transactions={transactions}
+        transactions={allTransactions}
         onClose={() => setDetailsModal(null)}
+      />
+
+      <CategoryManagerDialog
+        open={categoryManagerOpen}
+        onOpenChange={setCategoryManagerOpen}
+        transactions={allTransactions}
+        onRenameCategory={renameCategory}
+        onMergeCategories={mergeCategories}
       />
     </div>
   );
