@@ -171,97 +171,232 @@
   overflow: visible;
 }
 
-.runner-limb {
+.runner-segment {
   transform-box: fill-box;
   transform-origin: 0 0;
 }
 
 .runner-figure {
-  animation: runner-figure-bob 0.32s ease-in-out infinite alternate;
-  transform-origin: 32px 58px;
+  animation: runner-figure-gait 0.52s linear infinite;
+  transform-origin: 34px 59px;
   transform-box: view-box;
 }
 
 .runner-shadow {
-  animation: runner-shadow-pulse 0.32s ease-in-out infinite alternate;
-  transform-origin: 32px 58px;
+  animation: runner-shadow-gait 0.52s linear infinite;
+  transform-origin: 34px 59px;
   transform-box: view-box;
 }
 
-.runner-arm-left {
-  animation: runner-arm-left 0.4s linear infinite;
+.runner-leg-l-thigh {
+  animation: runner-leg-l-thigh 0.52s linear infinite;
 }
 
-.runner-arm-right {
-  animation: runner-arm-right 0.4s linear infinite;
+.runner-leg-l-calf {
+  animation: runner-leg-l-calf 0.52s linear infinite;
 }
 
-.runner-leg-left {
-  animation: runner-leg-left 0.4s linear infinite;
+.runner-leg-r-thigh {
+  animation: runner-leg-r-thigh 0.52s linear infinite;
 }
 
-.runner-leg-right {
-  animation: runner-leg-right 0.4s linear infinite;
+.runner-leg-r-calf {
+  animation: runner-leg-r-calf 0.52s linear infinite;
 }
 
-@keyframes runner-figure-bob {
-  from {
-    transform: translateY(0) rotate(-6deg);
-  }
-  to {
-    transform: translateY(-3px) rotate(-6deg);
-  }
+.runner-arm-l-upper {
+  animation: runner-arm-l-upper 0.52s linear infinite;
 }
 
-@keyframes runner-shadow-pulse {
-  from {
-    transform: scaleX(1);
-    opacity: 0.22;
-  }
-  to {
-    transform: scaleX(0.85);
-    opacity: 0.14;
-  }
+.runner-arm-l-fore {
+  animation: runner-arm-l-fore 0.52s linear infinite;
 }
 
-/* Classic run cycle: opposite arm / leg forward, in place */
-@keyframes runner-arm-left {
+.runner-arm-r-upper {
+  animation: runner-arm-r-upper 0.52s linear infinite;
+}
+
+.runner-arm-r-fore {
+  animation: runner-arm-r-fore 0.52s linear infinite;
+}
+
+@keyframes runner-figure-gait {
   0%,
   100% {
-    transform: rotate(48deg);
+    transform: translateY(1px) rotate(-8deg);
+  }
+  8% {
+    transform: translateY(3px) rotate(-8deg);
+  }
+  22% {
+    transform: translateY(-2px) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(1px) rotate(-8deg);
+  }
+  58% {
+    transform: translateY(3px) rotate(-8deg);
+  }
+  72% {
+    transform: translateY(-2px) rotate(-10deg);
+  }
+}
+
+@keyframes runner-shadow-gait {
+  0%,
+  100% {
+    transform: scaleX(1.05);
+    opacity: 0.2;
+  }
+  8%,
+  58% {
+    transform: scaleX(1.15);
+    opacity: 0.26;
+  }
+  22%,
+  72% {
+    transform: scaleX(0.82);
+    opacity: 0.12;
+  }
+}
+
+@keyframes runner-leg-l-thigh {
+  0%,
+  100% {
+    transform: rotate(28deg);
+  }
+  12% {
+    transform: rotate(22deg);
+  }
+  28% {
+    transform: rotate(-6deg);
   }
   50% {
     transform: rotate(-42deg);
   }
+  72% {
+    transform: rotate(-18deg);
+  }
+  88% {
+    transform: rotate(8deg);
+  }
 }
 
-@keyframes runner-arm-right {
+@keyframes runner-leg-l-calf {
   0%,
   100% {
-    transform: rotate(-48deg);
+    transform: rotate(-8deg);
+  }
+  12% {
+    transform: rotate(4deg);
+  }
+  28% {
+    transform: rotate(-52deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
+  72% {
+    transform: rotate(-38deg);
+  }
+  88% {
+    transform: rotate(-62deg);
+  }
+}
+
+@keyframes runner-leg-r-thigh {
+  0%,
+  100% {
+    transform: rotate(-42deg);
+  }
+  12% {
+    transform: rotate(-18deg);
+  }
+  28% {
+    transform: rotate(8deg);
+  }
+  50% {
+    transform: rotate(28deg);
+  }
+  72% {
+    transform: rotate(22deg);
+  }
+  88% {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes runner-leg-r-calf {
+  0%,
+  100% {
+    transform: rotate(18deg);
+  }
+  12% {
+    transform: rotate(-38deg);
+  }
+  28% {
+    transform: rotate(-62deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+  72% {
+    transform: rotate(4deg);
+  }
+  88% {
+    transform: rotate(-52deg);
+  }
+}
+
+@keyframes runner-arm-l-upper {
+  0%,
+  100% {
+    transform: rotate(-38deg);
   }
   50% {
     transform: rotate(42deg);
   }
 }
 
-@keyframes runner-leg-left {
+@keyframes runner-arm-l-fore {
   0%,
   100% {
-    transform: rotate(-44deg);
+    transform: rotate(-22deg);
+  }
+  25% {
+    transform: rotate(-48deg);
   }
   50% {
-    transform: rotate(50deg);
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-12deg);
   }
 }
 
-@keyframes runner-leg-right {
+@keyframes runner-arm-r-upper {
   0%,
   100% {
-    transform: rotate(44deg);
+    transform: rotate(42deg);
   }
   50% {
-    transform: rotate(-50deg);
+    transform: rotate(-38deg);
+  }
+}
+
+@keyframes runner-arm-r-fore {
+  0%,
+  100% {
+    transform: rotate(8deg);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+  75% {
+    transform: rotate(-48deg);
   }
 }
 
