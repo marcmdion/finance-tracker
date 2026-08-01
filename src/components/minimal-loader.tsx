@@ -3,7 +3,7 @@ interface MinimalLoaderProps {
   className?: string;
 }
 
-/** Quiet three-dot pulse — no figurative imagery. */
+/** Three-dot wave — visible motion on mobile Safari. */
 export function MinimalLoader({
   label = "Loading your finances…",
   className = "",
@@ -15,10 +15,7 @@ export function MinimalLoader({
       aria-live="polite"
       aria-label={label}
     >
-      <div
-        className="loader-dots text-foreground/40 dark:text-foreground/50"
-        aria-hidden="true"
-      >
+      <div className="loader-dots" aria-hidden="true">
         <span className="loader-dot" />
         <span className="loader-dot" />
         <span className="loader-dot" />

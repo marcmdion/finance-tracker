@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function AuthScreen() {
+export function AuthScreen({ initNotice }: { initNotice?: string | null }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,6 +58,12 @@ export function AuthScreen() {
             Track income, expenses, and cash flow across custom billing cycles.
           </p>
         </div>
+
+        {initNotice && (
+          <Alert className="mb-6 border-border/60 bg-muted/40">
+            <AlertDescription>{initNotice}</AlertDescription>
+          </Alert>
+        )}
 
         {error && (
           <Alert variant="destructive" className="mb-6 border-destructive/20 bg-destructive/5">
