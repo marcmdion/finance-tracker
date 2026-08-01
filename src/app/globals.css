@@ -171,77 +171,97 @@
   overflow: visible;
 }
 
-.runner-bob {
-  animation: runner-body-bob 0.35s ease-in-out infinite alternate;
-  transform-origin: 32px 36px;
+.runner-limb {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+}
+
+.runner-figure {
+  animation: runner-figure-bob 0.32s ease-in-out infinite alternate;
+  transform-origin: 32px 58px;
+  transform-box: view-box;
+}
+
+.runner-shadow {
+  animation: runner-shadow-pulse 0.32s ease-in-out infinite alternate;
+  transform-origin: 32px 58px;
+  transform-box: view-box;
 }
 
 .runner-arm-left {
-  animation: runner-arm-left 0.45s ease-in-out infinite;
-  transform-origin: 32px 22px;
+  animation: runner-arm-left 0.4s linear infinite;
 }
 
 .runner-arm-right {
-  animation: runner-arm-right 0.45s ease-in-out infinite;
-  transform-origin: 32px 22px;
+  animation: runner-arm-right 0.4s linear infinite;
 }
 
 .runner-leg-left {
-  animation: runner-leg-left 0.45s ease-in-out infinite;
-  transform-origin: 32px 36px;
+  animation: runner-leg-left 0.4s linear infinite;
 }
 
 .runner-leg-right {
-  animation: runner-leg-right 0.45s ease-in-out infinite;
-  transform-origin: 32px 36px;
+  animation: runner-leg-right 0.4s linear infinite;
 }
 
-@keyframes runner-body-bob {
+@keyframes runner-figure-bob {
   from {
-    transform: translateY(0);
+    transform: translateY(0) rotate(-6deg);
   }
   to {
-    transform: translateY(-2px);
+    transform: translateY(-3px) rotate(-6deg);
   }
 }
 
+@keyframes runner-shadow-pulse {
+  from {
+    transform: scaleX(1);
+    opacity: 0.22;
+  }
+  to {
+    transform: scaleX(0.85);
+    opacity: 0.14;
+  }
+}
+
+/* Classic run cycle: opposite arm / leg forward, in place */
 @keyframes runner-arm-left {
   0%,
   100% {
-    transform: rotate(38deg);
+    transform: rotate(48deg);
   }
   50% {
-    transform: rotate(-32deg);
+    transform: rotate(-42deg);
   }
 }
 
 @keyframes runner-arm-right {
   0%,
   100% {
-    transform: rotate(-38deg);
+    transform: rotate(-48deg);
   }
   50% {
-    transform: rotate(32deg);
+    transform: rotate(42deg);
   }
 }
 
 @keyframes runner-leg-left {
   0%,
   100% {
-    transform: rotate(-34deg);
+    transform: rotate(-44deg);
   }
   50% {
-    transform: rotate(36deg);
+    transform: rotate(50deg);
   }
 }
 
 @keyframes runner-leg-right {
   0%,
   100% {
-    transform: rotate(34deg);
+    transform: rotate(44deg);
   }
   50% {
-    transform: rotate(-36deg);
+    transform: rotate(-50deg);
   }
 }
 
