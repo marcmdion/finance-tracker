@@ -4,7 +4,13 @@ import {
   getApp,
   type FirebaseApp,
 } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, initializeAuth, type Auth } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  browserSessionPersistence,
+  indexedDBLocalPersistence,
+  inMemoryPersistence,
+} from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,6 +22,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
+
+export function isFirebaseConfigured(): boolean {
+  return Boolean(
+    firebaseConfig.apiKey &&
+      firebaseConfig.authDomain &&
+      firebaseConfig.projectId &&
+      firebaseConfig.appId,
+  );
+}
 
 let firebaseApp: FirebaseApp | undefined;
 let firebaseAuth: Auth | undefined;
@@ -29,7 +44,18 @@ function initFirebase() {
   if (!firebaseApp) {
     firebaseApp =
       getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    firebaseAuth = getAuth(firebaseApp);
+    try {
+      firebaseAuth = initializeAuth(firebaseApp, {
+        persistence: [
+          indexedDBLocalPersistence,
+          browserLocalPersistence,
+          browserSessionPersistence,
+          inMemoryPersistence,
+        ],
+      });
+    } catch {
+      firebaseAuth = getAuth(firebaseApp);
+    }
     firebaseDb = getFirestore(firebaseApp);
   }
 

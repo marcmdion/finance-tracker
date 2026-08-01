@@ -46,7 +46,7 @@ import type {
 } from "@/lib/types";
 
 export function FinanceApp() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, initError } = useAuth();
   const {
     transactions: allTransactions,
     loading: allLoading,
@@ -173,7 +173,7 @@ export function FinanceApp() {
   }
 
   if (!user) {
-    return <AuthScreen />;
+    return <AuthScreen initNotice={initError} />;
   }
 
   if (syncError) {
