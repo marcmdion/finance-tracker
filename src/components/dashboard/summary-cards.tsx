@@ -14,22 +14,22 @@ const cards = [
     key: "income",
     label: "Income",
     icon: ArrowUpRight,
-    tone: "text-emerald-600/90",
-    iconBg: "bg-emerald-500/8",
+    tone: "text-emerald-600/90 dark:text-emerald-400/90",
+    iconBg: "bg-emerald-500/8 dark:bg-emerald-400/12",
   },
   {
     key: "expenses",
     label: "Expenses",
     icon: ArrowDownLeft,
-    tone: "text-rose-600/90",
-    iconBg: "bg-rose-500/8",
+    tone: "text-rose-600/90 dark:text-rose-400/90",
+    iconBg: "bg-rose-500/8 dark:bg-rose-400/12",
   },
   {
     key: "net",
     label: "Net balance",
     icon: CircleDot,
     tone: "text-foreground/80",
-    iconBg: "bg-primary/8",
+    iconBg: "bg-primary/8 dark:bg-primary/15",
   },
 ] as const;
 
