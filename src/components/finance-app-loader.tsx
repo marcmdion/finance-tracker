@@ -2,14 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { RunningManLoader } from "@/components/running-man-loader";
+import { MinimalLoader } from "@/components/minimal-loader";
 
 const FinanceApp = dynamic(
   () => import("@/components/finance-app").then((mod) => mod.FinanceApp),
   {
     ssr: false,
     loading: () => (
-      <RunningManLoader
+      <MinimalLoader
         label="Warming up Finance Strategist…"
         className="min-h-screen"
       />

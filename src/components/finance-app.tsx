@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
 import { Download, LogOut, Tags } from "lucide-react";
 import { toast } from "sonner";
-import { RunningManLoader } from "@/components/running-man-loader";
+import { MinimalLoader } from "@/components/minimal-loader";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { CategoryDetailsDialog } from "@/components/dashboard/category-details-dialog";
 import { CategoryManagerDialog } from "@/components/dashboard/category-manager-dialog";
@@ -168,7 +168,7 @@ export function FinanceApp() {
 
   if (authLoading) {
     return (
-      <RunningManLoader label="Checking your session…" className="min-h-screen" />
+      <MinimalLoader label="Checking your session…" className="min-h-screen" />
     );
   }
 
@@ -266,7 +266,7 @@ export function FinanceApp() {
 
           {cycleLoading ? (
             <div className="surface flex items-center justify-center py-16">
-              <RunningManLoader label="Syncing this cycle…" />
+              <MinimalLoader label="Syncing this cycle…" />
             </div>
           ) : (
             <TransactionTable
@@ -280,7 +280,7 @@ export function FinanceApp() {
         <TabsContent value="summary">
           {dataStillLoading ? (
             <div className="surface flex items-center justify-center py-20">
-              <RunningManLoader label="Loading summary history…" />
+              <MinimalLoader label="Loading summary history…" />
             </div>
           ) : (
             <SummaryTable
