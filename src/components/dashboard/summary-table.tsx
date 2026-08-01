@@ -126,7 +126,7 @@ export function SummaryTable({
               {summaryData.cycles.map(([key]) => (
                 <TableCell
                   key={`tot-inc-${key}`}
-                  className="metric-value-sm text-right text-emerald-600/90"
+                  className="metric-value-sm text-right text-emerald-600/90 dark:text-emerald-400/90"
                 >
                   ${(summaryData.totals.income[key] || 0).toFixed(2)}
                 </TableCell>
@@ -153,15 +153,15 @@ export function SummaryTable({
               {summaryData.cycles.map(([key]) => (
                 <TableCell
                   key={`tot-exp-${key}`}
-                  className="metric-value-sm text-right text-rose-600/90"
+                  className="metric-value-sm text-right text-rose-600/90 dark:text-rose-400/90"
                 >
                   ${(summaryData.totals.expense[key] || 0).toFixed(2)}
                 </TableCell>
               ))}
             </TableRow>
 
-            <TableRow className="border-border/50 bg-primary/90 hover:bg-primary/90">
-              <TableCell className="sticky left-0 z-10 bg-primary/90 py-4 font-medium text-primary-foreground">
+            <TableRow className="border-border/50 bg-muted/50 hover:bg-muted/50 dark:bg-muted/35">
+              <TableCell className="sticky left-0 z-10 bg-muted/50 py-4 font-medium dark:bg-muted/35">
                 Net balance
               </TableCell>
               {summaryData.cycles.map(([key]) => {
@@ -170,9 +170,9 @@ export function SummaryTable({
                   <TableCell
                     key={`net-${key}`}
                     className={cn(
-                      "metric-value-sm text-right text-primary-foreground",
-                      net < 0 && "text-rose-200",
-                      net >= 0 && "text-emerald-100",
+                      "metric-value-sm text-right text-foreground/90",
+                      net < 0 && "text-destructive",
+                      net >= 0 && "text-emerald-600/90 dark:text-emerald-400/90",
                     )}
                   >
                     {net < 0 ? "−" : ""}${Math.abs(net).toFixed(2)}
