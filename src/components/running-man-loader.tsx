@@ -14,24 +14,58 @@ export function RunningManLoader({
       aria-live="polite"
       aria-label={label}
     >
-      <div className="running-track relative h-16 w-28 overflow-hidden">
-        <div className="running-man-runner absolute bottom-0 left-0">
-          <svg
-            viewBox="0 0 64 64"
-            className="running-man-bob size-12 text-primary"
-            aria-hidden="true"
-          >
-            <circle cx="32" cy="10" r="6" fill="currentColor" />
+      <div className="flex h-20 w-20 items-end justify-center">
+        <svg
+          viewBox="0 0 64 64"
+          className="runner-in-place size-16 text-primary"
+          aria-hidden="true"
+        >
+          <g className="runner-bob">
+            <circle cx="32" cy="11" r="6" fill="currentColor" />
             <path
-              d="M32 16 L32 34 M32 22 L20 30 M32 22 L44 30 M32 34 L22 50 M32 34 L42 50"
+              d="M32 17 L32 36"
               stroke="currentColor"
               strokeWidth="4"
               strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
             />
-          </svg>
-        </div>
+            <g className="runner-arm runner-arm-left">
+              <path
+                d="M32 22 L20 30"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </g>
+            <g className="runner-arm runner-arm-right">
+              <path
+                d="M32 22 L44 30"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </g>
+            <g className="runner-leg runner-leg-left">
+              <path
+                d="M32 36 L22 52"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </g>
+            <g className="runner-leg runner-leg-right">
+              <path
+                d="M32 36 L42 52"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </g>
+          </g>
+        </svg>
       </div>
       <p className="text-sm text-muted-foreground">{label}</p>
     </div>
