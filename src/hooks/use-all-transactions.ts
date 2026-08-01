@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   collection,
   doc,
@@ -37,9 +37,13 @@ export function useAllTransactions(user: User | null) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
+  const migrationAttemptedRef = useRef(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      migrationAttemptedRef.current = false;
+      return;
+    }
 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Firestore subscription lifecycle
     setLoading(true);
@@ -54,9 +58,12 @@ export function useAllTransactions(user: User | null) {
           data: docSnap.data() as Record<string, unknown>,
         }));
 
-        void migrateLegacyDocuments(user, rawDocs).catch((error) => {
-          console.error("Legacy migration error:", error);
-        });
+        if (!migrationAttemptedRef.current) {
+          migrationAttemptedRef.current = true;
+          void migrateLegacyDocuments(user, rawDocs).catch((error) => {
+            console.error("Legacy migration error:", error);
+          });
+        }
 
         const data = rawDocs.map(({ id, data }) =>
           normalizeTransaction(id, data),

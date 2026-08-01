@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
-import { Download, Loader2, LogOut, Tags } from "lucide-react";
+import { Download, LogOut, Tags } from "lucide-react";
 import { toast } from "sonner";
+import { RunningManLoader } from "@/components/running-man-loader";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { CategoryDetailsDialog } from "@/components/dashboard/category-details-dialog";
 import { CategoryManagerDialog } from "@/components/dashboard/category-manager-dialog";
@@ -165,11 +166,9 @@ export function FinanceApp() {
     toast.success("CSV export downloaded");
   };
 
-  if (authLoading || (user && allLoading)) {
+  if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
-      </div>
+      <RunningManLoader label="Checking your session…" className="min-h-screen" />
     );
   }
 
@@ -180,6 +179,8 @@ export function FinanceApp() {
   if (syncError) {
     return <PermissionDenied />;
   }
+
+  const dataStillLoading = allLoading;
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -265,7 +266,7 @@ export function FinanceApp() {
 
           {cycleLoading ? (
             <div className="surface flex items-center justify-center py-16">
-              <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
+              <RunningManLoader label="Syncing this cycle…" />
             </div>
           ) : (
             <TransactionTable
@@ -277,10 +278,16 @@ export function FinanceApp() {
         </TabsContent>
 
         <TabsContent value="summary">
-          <SummaryTable
-            summaryData={summaryData}
-            onCategoryClick={setDetailsModal}
-          />
+          {dataStillLoading ? (
+            <div className="surface flex items-center justify-center py-20">
+              <RunningManLoader label="Loading summary history…" />
+            </div>
+          ) : (
+            <SummaryTable
+              summaryData={summaryData}
+              onCategoryClick={setDetailsModal}
+            />
+          )}
         </TabsContent>
       </Tabs>
 

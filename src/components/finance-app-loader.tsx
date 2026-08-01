@@ -1,17 +1,18 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { RunningManLoader } from "@/components/running-man-loader";
 
 const FinanceApp = dynamic(
   () => import("@/components/finance-app").then((mod) => mod.FinanceApp),
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-5 animate-spin text-muted-foreground/70" />
-      </div>
+      <RunningManLoader
+        label="Warming up Finance Strategist…"
+        className="min-h-screen"
+      />
     ),
   },
 );
