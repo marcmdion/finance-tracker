@@ -36,7 +36,11 @@ export function CategoryDetailsDialog({
         .filter(
           (t) => t.category === modal.category && t.type === modal.type,
         )
-        .sort((a, b) => b.createdAt - a.createdAt)
+        .sort(
+          (a, b) =>
+            b.transactionDate.localeCompare(a.transactionDate) ||
+            b.createdAt - a.createdAt,
+        )
     : [];
 
   return (
