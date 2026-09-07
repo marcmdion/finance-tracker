@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTheme } from "next-themes";
 import {
   ResponsiveContainer,
@@ -35,6 +36,7 @@ function CustomSankeyNode({
 }: CustomSankeyNodeProps) {
   if (!payload) return null;
 
+  const label = payload.displayLabel || payload.name;
   const percent = payload.totalFlow
     ? Math.round((payload.value / payload.totalFlow) * 100)
     : 0;
@@ -70,7 +72,7 @@ function CustomSankeyNode({
         strokeLinejoin="round"
         paintOrder="stroke"
       >
-        {payload.displayLabel || payload.name}
+        {label}
       </text>
       <text
         textAnchor={pushLeft ? "end" : "start"}
@@ -90,6 +92,34 @@ function CustomSankeyNode({
   );
 }
 
+function getSankeyLayout(data: SankeyData) {
+  let maxLeft = 0;
+  let maxRight = 0;
+
+  for (const node of data.nodes) {
+    const label = node.displayLabel || node.name;
+    const lineLength = Math.max(label.length, `$99999.99 · 100%`.length);
+    const isLeft =
+      node.name.includes("(Income)") || node.name.includes("(Deficit)");
+
+    if (isLeft) {
+      maxLeft = Math.max(maxLeft, lineLength);
+    } else if (node.name !== "Total Budget") {
+      maxRight = Math.max(maxRight, lineLength);
+    }
+  }
+
+  return {
+    margin: {
+      top: 20,
+      bottom: 20,
+      left: Math.min(300, Math.max(148, maxLeft * 6.4 + 28)),
+      right: Math.min(360, Math.max(168, maxRight * 6.4 + 36)),
+    },
+    minWidth: Math.max(760, 560 + maxLeft * 6.4 + maxRight * 6.4),
+  };
+}
+
 interface SankeyChartProps {
   sankeyData: SankeyData | null;
 }
@@ -97,6 +127,11 @@ interface SankeyChartProps {
 export function SankeyChart({ sankeyData }: SankeyChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+
+  const layout = useMemo(
+    () => (sankeyData ? getSankeyLayout(sankeyData) : null),
+    [sankeyData],
+  );
 
   const tooltipStyle = isDark
     ? {
@@ -117,21 +152,22 @@ export function SankeyChart({ sankeyData }: SankeyChartProps) {
       };
 
   return (
-    <div className="surface flex flex-col overflow-hidden lg:col-span-2">
+    <div className="surface flex min-w-0 flex-col">
       <div className="border-b border-border/50 px-6 py-5">
         <p className="label-caps mb-1">Current cycle</p>
         <h2 className="text-lg font-medium tracking-[-0.02em]">Cash flow</h2>
       </div>
-      <div className="flex-grow overflow-x-auto px-2 pb-4">
+      <div className="flex-grow overflow-x-auto px-2 pb-4 lg:overflow-x-visible">
         <div
-          className="min-w-[750px] transition-all duration-300"
+          className="w-full transition-all duration-300"
           style={{
+            minWidth: layout?.minWidth ?? 760,
             height: sankeyData
               ? `${Math.max(400, sankeyData.nodes.length * 45)}px`
               : "400px",
           }}
         >
-          {sankeyData ? (
+          {sankeyData && layout ? (
             <ResponsiveContainer width="100%" height="100%">
               <Sankey
                 data={sankeyData}
@@ -139,7 +175,7 @@ export function SankeyChart({ sankeyData }: SankeyChartProps) {
                   <CustomSankeyNode {...props} isDark={isDark} />
                 )}
                 nodePadding={40}
-                margin={{ top: 20, bottom: 20, left: 140, right: 140 }}
+                margin={layout.margin}
                 link={{
                   stroke: isDark
                     ? "oklch(0.55 0.03 265)"
