@@ -183,7 +183,7 @@ export function FinanceApp() {
   const dataStillLoading = allLoading;
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 xl:max-w-7xl 2xl:max-w-[90rem]">
       <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <p className="label-caps">Personal finance</p>
@@ -251,7 +251,7 @@ export function FinanceApp() {
             netBalance={netBalance}
           />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(280px,320px)_minmax(0,1fr)]">
             <TransactionForm
               key={editingId ?? "new"}
               transactions={allTransactions}
