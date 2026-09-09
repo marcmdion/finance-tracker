@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatTransactionDate } from "@/lib/date-utils";
 import { formatMoney } from "@/lib/money-utils";
 
 interface CategoryDetailsDialogProps {
@@ -66,11 +67,7 @@ export function CategoryDetailsDialog({
               {filtered.map((tx) => (
                 <TableRow key={tx.id}>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {new Date(tx.transactionDate).toLocaleDateString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formatTransactionDate(tx.transactionDate)}
                         </TableCell>
                         <TableCell className="font-medium">{tx.name}</TableCell>
                         <TableCell className="metric-value-sm text-right whitespace-nowrap">

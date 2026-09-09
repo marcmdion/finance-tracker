@@ -1,8 +1,11 @@
+import {
+  formatCycleLabel,
+  formatDisplayDateMedium,
+  getTodayString,
+} from "@/lib/date-utils";
 import type { CycleDates, CycleInfo, Transaction } from "@/lib/types";
 
-export function getTodayString(): string {
-  return new Date().toISOString().split("T")[0];
-}
+export { getTodayString };
 
 export function getCycleDates(monthOffset = 0): CycleDates {
   const today = new Date();
@@ -45,12 +48,9 @@ export function getTransactionCycle(timestamp: number): CycleInfo {
     endYear++;
   }
 
-  const formatMonth = (m: number) =>
-    new Date(2000, m, 1).toLocaleDateString(undefined, { month: "short" });
-
   return {
     key: `${startYear}-${String(startMonth + 1).padStart(2, "0")}`,
-    label: `${formatMonth(startMonth)} 20 - ${formatMonth(endMonth)} 19, ${endYear}`,
+    label: formatCycleLabel(startMonth, endMonth, endYear),
   };
 }
 
@@ -67,11 +67,7 @@ export function filterTransactionsByCycle(
 }
 
 export function formatDateStr(date: Date): string {
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatDisplayDateMedium(date);
 }
 
 export function dateStringToTimestamp(dateStr: string): number {

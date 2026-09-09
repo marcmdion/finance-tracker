@@ -17,6 +17,7 @@ describe("exportTransactionsToCsv", () => {
     ]);
 
     expect(csv).toContain("Date,Type,Name,Category,Amount");
+    expect(csv).toContain("21/07/2026");
     expect(csv).toContain("Coffee");
     expect(csv).toContain("12.99");
   });
