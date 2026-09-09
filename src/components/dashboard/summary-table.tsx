@@ -402,7 +402,7 @@ export function SummaryTable({
     return (
       <>
         <div className={cn(SUMMARY_COL_WIDTH, "sticky", avgSticky, "px-3 text-right")}>
-          {formatSignedAmount(average, cn("text-sm text-muted-foreground", amountClass))}
+          {formatSignedAmount(average, amountClass, true)}
         </div>
         <div className={cn(SUMMARY_COL_WIDTH, totalSticky, "px-3 text-right")}>
           {formatSignedAmount(total, amountClass, true)}
