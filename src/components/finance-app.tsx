@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllTransactions } from "@/hooks/use-all-transactions";
 import { useAuth } from "@/hooks/use-auth";
-import { useMerchantMigrations } from "@/hooks/use-merchant-migrations";
 import {
   deleteTransaction,
   saveTransaction,
@@ -55,8 +54,6 @@ export function FinanceApp() {
     renameCategory,
     mergeCategories,
   } = useAllTransactions(user);
-
-  useMerchantMigrations(user, allTransactions, allLoading);
 
   const [cycleOffset, setCycleOffset] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
