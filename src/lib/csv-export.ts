@@ -1,3 +1,8 @@
+import {
+  formatTimestamp,
+  formatTransactionDate,
+  getTodayFilenameDate,
+} from "@/lib/date-utils";
 import type { Transaction } from "@/lib/types";
 import { centsToAmount } from "@/lib/money-utils";
 
@@ -16,15 +21,13 @@ export function exportTransactionsToCsv(transactions: Transaction[]): string {
     .slice()
     .sort((a, b) => b.transactionDate.localeCompare(a.transactionDate))
     .map((transaction) => [
-      transaction.transactionDate,
+      formatTransactionDate(transaction.transactionDate),
       transaction.type,
       escapeCsvField(transaction.name),
       escapeCsvField(transaction.category),
       centsToAmount(transaction.amountCents).toFixed(2),
-      new Date(transaction.createdAt).toISOString(),
-      transaction.updatedAt
-        ? new Date(transaction.updatedAt).toISOString()
-        : "",
+      formatTimestamp(transaction.createdAt),
+      transaction.updatedAt ? formatTimestamp(transaction.updatedAt) : "",
     ]);
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -48,6 +51,5 @@ function escapeCsvField(value: string): string {
 }
 
 export function buildExportFilename(prefix = "finance-strategist"): string {
-  const today = new Date().toISOString().split("T")[0];
-  return `${prefix}-${today}.csv`;
+  return `${prefix}-${getTodayFilenameDate()}.csv`;
 }

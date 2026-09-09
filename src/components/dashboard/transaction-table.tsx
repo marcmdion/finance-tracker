@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatTransactionDate } from "@/lib/date-utils";
 import { formatMoney } from "@/lib/money-utils";
 
 interface TransactionTableProps {
@@ -82,7 +83,7 @@ export function TransactionTable({
                     </span>
                   </TableCell>
                     <TableCell className="text-sm text-muted-foreground tabular-nums">
-                      {new Date(tx.transactionDate).toLocaleDateString()}
+                      {formatTransactionDate(tx.transactionDate)}
                     </TableCell>
                     <TableCell className="metric-value-sm text-right text-foreground/85">
                       {formatMoney(tx.amountCents, {
