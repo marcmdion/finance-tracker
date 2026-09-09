@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, CircleDot } from "lucide-react";
+import { formatCurrency, isNegativeAmount, roundToCents } from "@/lib/money-utils";
 import { cn } from "@/lib/utils";
 
 interface SummaryCardsProps {
@@ -47,8 +48,8 @@ export function SummaryCards({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {cards.map(({ key, label, icon: Icon, tone, iconBg }) => {
-        const value = values[key];
-        const isNegativeNet = key === "net" && value < 0;
+        const value = roundToCents(values[key]);
+        const isNegativeNet = key === "net" && isNegativeAmount(value);
 
         return (
           <div key={key} className="surface px-5 py-5 sm:px-6 sm:py-6">
@@ -64,7 +65,7 @@ export function SummaryCards({
                 isNegativeNet && "text-destructive",
               )}
             >
-              ${Math.abs(value).toFixed(2)}
+              {formatCurrency(value)}
             </div>
           </div>
         );

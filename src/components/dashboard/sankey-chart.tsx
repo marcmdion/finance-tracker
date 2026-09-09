@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 import { CHART_COLORS } from "@/lib/constants";
+import { formatCurrency } from "@/lib/money-utils";
 import type { SankeyData } from "@/lib/types";
 
 interface CustomSankeyNodeProps {
@@ -86,7 +87,7 @@ function CustomSankeyNode({
         strokeLinejoin="round"
         paintOrder="stroke"
       >
-        ${payload.value.toFixed(2)} · {percent}%
+        {formatCurrency(payload.value)} · {percent}%
       </text>
     </g>
   );
@@ -184,7 +185,7 @@ export function SankeyChart({ sankeyData }: SankeyChartProps) {
                 }}
               >
                 <Tooltip
-                  formatter={(value) => `$${Number(value).toFixed(2)}`}
+                  formatter={(value) => formatCurrency(Number(value))}
                   contentStyle={tooltipStyle}
                 />
               </Sankey>
