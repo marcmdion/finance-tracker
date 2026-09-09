@@ -141,7 +141,7 @@ export function FinanceApp() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!user) return;
+    if (!user) return { ok: false as const, message: "Not signed in." };
 
     const result = await deleteTransaction(user, id);
     if (result.ok) {
@@ -149,10 +149,26 @@ export function FinanceApp() {
       if (editingId === id) {
         handleCancelEdit();
       }
-      return;
+      return result;
     }
 
     toast.error(result.message);
+    return result;
+  };
+
+  const handleSaveExistingTransaction = async (
+    formData: TransactionFormData,
+    transactionId: string,
+  ) => {
+    if (!user) return { ok: false as const, message: "Not signed in." };
+
+    setIsSubmitting(true);
+    const existing = allTransactions.find(
+      (transaction) => transaction.id === transactionId,
+    );
+    const result = await saveTransaction(user, formData, transactionId, existing);
+    setIsSubmitting(false);
+    return result;
   };
 
   const handleExport = () => {
@@ -272,7 +288,9 @@ export function FinanceApp() {
             <TransactionTable
               transactions={currentCycleTransactions}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={async (id) => {
+                await handleDelete(id);
+              }}
             />
           )}
         </TabsContent>
@@ -294,7 +312,10 @@ export function FinanceApp() {
       <CategoryDetailsDialog
         modal={detailsModal}
         transactions={allTransactions}
+        isSubmitting={isSubmitting}
         onClose={() => setDetailsModal(null)}
+        onSaveTransaction={handleSaveExistingTransaction}
+        onDeleteTransaction={handleDelete}
       />
 
       <CategoryManagerDialog
