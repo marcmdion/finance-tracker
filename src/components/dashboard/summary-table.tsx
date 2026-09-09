@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { CategoryDetailsModal, SummaryData, TransactionType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { isNegativeAmount, roundToCents } from "@/lib/money-utils";
 import { cn } from "@/lib/utils";
 
 interface SummaryTableProps {
@@ -127,7 +128,8 @@ function formatSignedAmount(
   className?: string,
   metric = false,
 ) {
-  const isNegative = amount < 0;
+  const rounded = roundToCents(amount);
+  const isNegative = isNegativeAmount(amount);
 
   return (
     <span
@@ -137,7 +139,7 @@ function formatSignedAmount(
         className,
       )}
     >
-      {isNegative ? "−" : ""}${Math.abs(amount).toFixed(2)}
+      {isNegative ? "−" : ""}${Math.abs(rounded).toFixed(2)}
     </span>
   );
 }
@@ -395,7 +397,7 @@ export function SummaryTable({
         ? "text-rose-600/90 dark:text-rose-400/90"
         : type === "income"
           ? "text-emerald-600/90 dark:text-emerald-400/90"
-          : total < 0
+          : isNegativeAmount(total)
             ? "text-destructive"
             : "text-emerald-600/90 dark:text-emerald-400/90";
 
@@ -638,18 +640,19 @@ export function SummaryTable({
             </div>
             <div className="flex min-w-max">
               {summaryData.cycles.map(([key]) => {
-                const net = summaryData.totals.net[key] || 0;
+                const net = roundToCents(summaryData.totals.net[key] || 0);
+                const netIsNegative = isNegativeAmount(net);
                 return (
                   <div
                     key={key}
                     className={cn(
                       CYCLE_WIDTH,
                       "metric-value-sm px-3 text-right",
-                      net < 0 && "text-destructive",
-                      net >= 0 && "text-emerald-600/90 dark:text-emerald-400/90",
+                      netIsNegative && "text-destructive",
+                      !netIsNegative && "text-emerald-600/90 dark:text-emerald-400/90",
                     )}
                   >
-                    {net < 0 ? "−" : ""}${Math.abs(net).toFixed(2)}
+                    {netIsNegative ? "−" : ""}${Math.abs(net).toFixed(2)}
                   </div>
                 );
               })}

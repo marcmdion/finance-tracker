@@ -33,6 +33,15 @@ export function centsToAmount(cents: number): number {
   return cents / 100;
 }
 
+export function roundToCents(amount: number): number {
+  const cents = Math.round(amount * 100);
+  return cents === 0 ? 0 : cents / 100;
+}
+
+export function isNegativeAmount(amount: number): boolean {
+  return roundToCents(amount) < 0;
+}
+
 export function formatMoney(cents: number, options?: { signed?: boolean; type?: "income" | "expense" }): string {
   const value = centsToAmount(Math.abs(cents));
   const formatted = `$${value.toFixed(2)}`;
