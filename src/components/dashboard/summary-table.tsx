@@ -4,7 +4,12 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { CategoryDetailsModal, SummaryData, TransactionType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { isNegativeAmount, roundToCents } from "@/lib/money-utils";
+import {
+  formatCurrency,
+  formatSignedCurrency,
+  isNegativeAmount,
+  roundToCents,
+} from "@/lib/money-utils";
 import { cn } from "@/lib/utils";
 
 interface SummaryTableProps {
@@ -113,7 +118,7 @@ function formatAmountWithPercent(
 
   return (
     <span className={cn("whitespace-nowrap", className)}>
-      ${amount.toFixed(2)}
+      {formatCurrency(amount)}
       {type === "expense" && (
         <span className="ml-1.5 text-[0.68rem] text-muted-foreground/60">
           {percentage}%
@@ -128,9 +133,6 @@ function formatSignedAmount(
   className?: string,
   metric = false,
 ) {
-  const rounded = roundToCents(amount);
-  const isNegative = isNegativeAmount(amount);
-
   return (
     <span
       className={cn(
@@ -139,7 +141,7 @@ function formatSignedAmount(
         className,
       )}
     >
-      {isNegative ? "−" : ""}${Math.abs(rounded).toFixed(2)}
+      {formatSignedCurrency(amount)}
     </span>
   );
 }
@@ -339,7 +341,7 @@ export function SummaryTable({
       >
         {amount ? (
           <span className="whitespace-nowrap">
-            ${amount.toFixed(2)}
+            {formatCurrency(amount)}
             {type === "expense" && (
               <span className="ml-1.5 text-[0.68rem] text-muted-foreground/60">
                 {percentage}%
@@ -575,7 +577,7 @@ export function SummaryTable({
                     "metric-value-sm px-3 text-right text-emerald-600/90 dark:text-emerald-400/90",
                   )}
                 >
-                  ${(summaryData.totals.income[key] || 0).toFixed(2)}
+                  {formatCurrency(summaryData.totals.income[key] || 0)}
                 </div>
               ))}
             </div>
@@ -611,7 +613,7 @@ export function SummaryTable({
                     "metric-value-sm px-3 text-right text-rose-600/90 dark:text-rose-400/90",
                   )}
                 >
-                  ${(summaryData.totals.expense[key] || 0).toFixed(2)}
+                  {formatCurrency(summaryData.totals.expense[key] || 0)}
                 </div>
               ))}
             </div>
@@ -652,7 +654,7 @@ export function SummaryTable({
                       !netIsNegative && "text-emerald-600/90 dark:text-emerald-400/90",
                     )}
                   >
-                    {netIsNegative ? "−" : ""}${Math.abs(net).toFixed(2)}
+                    {formatSignedCurrency(net)}
                   </div>
                 );
               })}

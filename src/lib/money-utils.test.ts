@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   centsToAmount,
+  formatAmount,
+  formatCurrency,
   formatMoney,
+  formatSignedCurrency,
   isNegativeAmount,
   parseAmountToCents,
   roundToCents,
@@ -29,8 +32,15 @@ describe("money utils", () => {
 
   it("formats money from cents", () => {
     expect(formatMoney(1234)).toBe("$12.34");
+    expect(formatMoney(1269920)).toBe("$12,699.20");
     expect(formatMoney(500, { signed: true, type: "income" })).toBe("+$5.00");
     expect(centsToAmount(199)).toBe(1.99);
+  });
+
+  it("formats amounts with thousands separators", () => {
+    expect(formatAmount(12699.2)).toBe("12,699.20");
+    expect(formatCurrency(12699.2)).toBe("$12,699.20");
+    expect(formatSignedCurrency(-2891.51)).toBe("−$2,891.51");
   });
 
   it("rounds display amounts to cents and treats tiny negatives as zero", () => {

@@ -42,9 +42,31 @@ export function isNegativeAmount(amount: number): boolean {
   return roundToCents(amount) < 0;
 }
 
+const amountFormatter = new Intl.NumberFormat("en-NZ", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export function formatAmount(amount: number): string {
+  return amountFormatter.format(Math.abs(roundToCents(amount)));
+}
+
+export function formatCurrency(amount: number): string {
+  return `$${formatAmount(amount)}`;
+}
+
+export function formatSignedCurrency(amount: number): string {
+  const rounded = roundToCents(amount);
+
+  if (isNegativeAmount(rounded)) {
+    return `−$${formatAmount(rounded)}`;
+  }
+
+  return `$${formatAmount(rounded)}`;
+}
+
 export function formatMoney(cents: number, options?: { signed?: boolean; type?: "income" | "expense" }): string {
-  const value = centsToAmount(Math.abs(cents));
-  const formatted = `$${value.toFixed(2)}`;
+  const formatted = formatCurrency(centsToAmount(Math.abs(cents)));
 
   if (!options?.signed) {
     return formatted;
