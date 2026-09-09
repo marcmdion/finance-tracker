@@ -12,7 +12,7 @@ interface SummaryTableProps {
 }
 
 type SortDirection = "asc" | "desc";
-type SortKey = "category" | "total" | string;
+type SortKey = "category" | "average" | "total" | string;
 
 interface SortState {
   key: SortKey;
@@ -34,10 +34,11 @@ type SummaryRow =
   | { kind: "net-balance" };
 
 const CATEGORY_WIDTH = "w-[11.5rem] sm:w-[12.5rem]";
-const TOTAL_WIDTH = "w-[8.5rem] sm:w-[9rem]";
+const SUMMARY_COL_WIDTH = "w-[7.25rem] shrink-0 sm:w-[7.75rem]";
 const CYCLE_WIDTH = "w-[7.25rem] shrink-0 sm:w-[7.75rem]";
 const ROW_BASE = "flex min-h-11 items-center border-b border-border/30";
-const ROW_BASE_TALL = "flex min-h-[3.25rem] items-center border-b border-border/30";
+
+const AVG_STICKY_OFFSET = "right-[7.25rem] sm:right-[7.75rem]";
 
 function sumRowAmounts(
   amounts: Record<string, number>,
@@ -61,6 +62,10 @@ function sortCategoryEntries(
     } else if (sort.key === "total") {
       cmp =
         sumRowAmounts(a[1], cycleKeys) - sumRowAmounts(b[1], cycleKeys);
+    } else if (sort.key === "average") {
+      cmp =
+        sumRowAmounts(a[1], cycleKeys) / Math.max(cycleKeys.length, 1) -
+        sumRowAmounts(b[1], cycleKeys) / Math.max(cycleKeys.length, 1);
     } else {
       cmp = (a[1][sort.key] || 0) - (b[1][sort.key] || 0);
     }
@@ -97,67 +102,75 @@ function SortIcon({ active, direction }: { active: boolean; direction: SortDirec
   );
 }
 
-function formatRowSummary(
-  rowTotal: number,
+function formatAmountWithPercent(
+  amount: number,
   type: TransactionType,
-  rowTotalPercentage: number,
-  cycleCount: number,
-  valueClassName?: string,
+  percentage: number,
+  className?: string,
 ) {
-  if (rowTotal <= 0 || cycleCount === 0) return "—";
-
-  const rowAverage = rowTotal / cycleCount;
+  if (amount <= 0) return "—";
 
   return (
-    <div className={cn("flex flex-col items-end gap-0.5", valueClassName)}>
-      <span className="whitespace-nowrap">
-        ${rowTotal.toFixed(2)}
-        {type === "expense" && (
-          <span className="ml-1.5 text-[0.68rem] text-muted-foreground/60">
-            {rowTotalPercentage}%
-          </span>
-        )}
-      </span>
-      <span className="whitespace-nowrap text-[0.68rem] text-muted-foreground">
-        avg ${rowAverage.toFixed(2)}
-        {type === "expense" && (
-          <span className="ml-1.5 text-muted-foreground/60">
-            {rowTotalPercentage}%
-          </span>
-        )}
-      </span>
+    <span className={cn("whitespace-nowrap", className)}>
+      ${amount.toFixed(2)}
+      {type === "expense" && (
+        <span className="ml-1.5 text-[0.68rem] text-muted-foreground/60">
+          {percentage}%
+        </span>
+      )}
+    </span>
+  );
+}
+
+function formatSignedAmount(
+  amount: number,
+  className?: string,
+  metric = false,
+) {
+  const isNegative = amount < 0;
+
+  return (
+    <span
+      className={cn(
+        metric && "metric-value-sm",
+        "whitespace-nowrap",
+        className,
+      )}
+    >
+      {isNegative ? "−" : ""}${Math.abs(amount).toFixed(2)}
+    </span>
+  );
+}
+
+function SummarySortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  stickyClassName,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: SortState;
+  onSort: (next: SortState) => void;
+  stickyClassName: string;
+}) {
+  return (
+    <div className={cn(SUMMARY_COL_WIDTH, stickyClassName, "px-3")}>
+      <button
+        type="button"
+        onClick={() => onSort(nextSortState(sort, sortKey))}
+        className="label-caps ml-auto flex items-center justify-end gap-1.5 hover:text-foreground"
+      >
+        <span>{label}</span>
+        <SortIcon active={sort.key === sortKey} direction={sort.direction} />
+      </button>
     </div>
   );
 }
 
-function formatGrandSummary(
-  total: number,
-  cycleCount: number,
-  type: "income" | "expense" | "net",
-) {
-  if (cycleCount === 0) return "—";
-
-  const average = total / cycleCount;
-  const isNegative = total < 0;
-  const amountClass =
-    type === "expense"
-      ? "text-rose-600/90 dark:text-rose-400/90"
-      : type === "income"
-        ? "text-emerald-600/90 dark:text-emerald-400/90"
-        : isNegative
-          ? "text-destructive"
-          : "text-emerald-600/90 dark:text-emerald-400/90";
-
-  return (
-    <div className="flex flex-col items-end gap-0.5">
-      <span className={cn("metric-value-sm whitespace-nowrap", amountClass)}>
-        {isNegative ? "−" : ""}${Math.abs(total).toFixed(2)}
-      </span>
-      <span className={cn("whitespace-nowrap text-[0.68rem] text-muted-foreground", amountClass)}>
-        avg {isNegative ? "−" : ""}${Math.abs(average).toFixed(2)}
-      </span>
-    </div>
-  );
+function SummaryStickySpacer({ stickyClassName }: { stickyClassName: string }) {
+  return <div className={cn(SUMMARY_COL_WIDTH, stickyClassName)} />;
 }
 
 export function SummaryTable({
@@ -168,6 +181,8 @@ export function SummaryTable({
     () => summaryData.cycles.map(([key]) => key),
     [summaryData.cycles],
   );
+
+  const cycleCount = cycleKeys.length;
 
   const [incomeSort, setIncomeSort] = useState<SortState>({
     key: "category",
@@ -246,6 +261,61 @@ export function SummaryTable({
     return next;
   }, [sortedExpenses, sortedIncomes]);
 
+  const stickyAvgHeader = cn(
+    AVG_STICKY_OFFSET,
+    "z-20 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
+  );
+  const stickyTotalHeader = cn(
+    "sticky right-0 z-20 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
+  );
+  const stickyAvgCell = cn(
+    AVG_STICKY_OFFSET,
+    "z-10 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
+  );
+  const stickyTotalCell = cn(
+    "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
+  );
+  const stickyAvgMuted = cn(
+    AVG_STICKY_OFFSET,
+    "z-10 shrink-0 border-l border-border/50 bg-muted/20 backdrop-blur-sm",
+  );
+  const stickyTotalMuted = cn(
+    "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/20 backdrop-blur-sm",
+  );
+  const stickyAvgFooter = cn(
+    AVG_STICKY_OFFSET,
+    "z-10 shrink-0 border-l border-border/50 bg-muted/80 backdrop-blur-sm",
+  );
+  const stickyTotalFooter = cn(
+    "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/80 backdrop-blur-sm",
+  );
+  const stickyAvgNet = cn(
+    AVG_STICKY_OFFSET,
+    "z-10 shrink-0 border-l border-border/50 bg-muted/50 backdrop-blur-sm dark:bg-muted/35",
+  );
+  const stickyTotalNet = cn(
+    "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/50 backdrop-blur-sm dark:bg-muted/35",
+  );
+
+  const renderSummaryHeaders = () => (
+    <>
+      <SummarySortHeader
+        label="Avg"
+        sortKey="average"
+        sort={incomeSort}
+        onSort={applySort}
+        stickyClassName={cn("sticky", stickyAvgHeader)}
+      />
+      <SummarySortHeader
+        label="Total"
+        sortKey="total"
+        sort={incomeSort}
+        onSort={applySort}
+        stickyClassName={stickyTotalHeader}
+      />
+    </>
+  );
+
   const renderCycleAmount = (
     amount: number | undefined,
     type: TransactionType,
@@ -278,6 +348,66 @@ export function SummaryTable({
           "—"
         )}
       </div>
+    );
+  };
+
+  const renderCategorySummaryCells = (
+    rowTotal: number,
+    type: TransactionType,
+    rowTotalPercentage: number,
+  ) => {
+    const rowAverage = cycleCount > 0 ? rowTotal / cycleCount : 0;
+
+    return (
+      <>
+        <div
+          className={cn(
+            SUMMARY_COL_WIDTH,
+            "sticky",
+            stickyAvgCell,
+            "px-3 text-right text-sm tabular-nums text-muted-foreground",
+          )}
+        >
+          {formatAmountWithPercent(rowAverage, type, rowTotalPercentage)}
+        </div>
+        <div
+          className={cn(
+            SUMMARY_COL_WIDTH,
+            stickyTotalCell,
+            "px-3 text-right text-sm font-medium tabular-nums",
+          )}
+        >
+          {formatAmountWithPercent(rowTotal, type, rowTotalPercentage)}
+        </div>
+      </>
+    );
+  };
+
+  const renderGrandSummaryCells = (
+    total: number,
+    type: "income" | "expense" | "net",
+    avgSticky: string,
+    totalSticky: string,
+  ) => {
+    const average = cycleCount > 0 ? total / cycleCount : 0;
+    const amountClass =
+      type === "expense"
+        ? "text-rose-600/90 dark:text-rose-400/90"
+        : type === "income"
+          ? "text-emerald-600/90 dark:text-emerald-400/90"
+          : total < 0
+            ? "text-destructive"
+            : "text-emerald-600/90 dark:text-emerald-400/90";
+
+    return (
+      <>
+        <div className={cn(SUMMARY_COL_WIDTH, "sticky", avgSticky, "px-3 text-right")}>
+          {formatSignedAmount(average, cn("text-sm text-muted-foreground", amountClass))}
+        </div>
+        <div className={cn(SUMMARY_COL_WIDTH, totalSticky, "px-3 text-right")}>
+          {formatSignedAmount(total, amountClass, true)}
+        </div>
+      </>
     );
   };
 
@@ -334,30 +464,7 @@ export function SummaryTable({
                 </div>
               ))}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-20 shrink-0 border-l border-border/50 bg-card/95 px-3 backdrop-blur-sm",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => applySort(nextSortState(incomeSort, "total"))}
-                className="label-caps ml-auto flex items-center justify-end gap-1.5 hover:text-foreground"
-              >
-                <span>Total / Avg</span>
-                <SortIcon
-                  active={
-                    incomeSort.key === "total" || expenseSort.key === "total"
-                  }
-                  direction={
-                    incomeSort.key === "total"
-                      ? incomeSort.direction
-                      : expenseSort.direction
-                  }
-                />
-              </button>
-            </div>
+            {renderSummaryHeaders()}
           </div>
         );
 
@@ -380,12 +487,8 @@ export function SummaryTable({
                 <div key={key} className={CYCLE_WIDTH} />
               ))}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/20 backdrop-blur-sm",
-              )}
-            />
+            <SummaryStickySpacer stickyClassName={cn("sticky", stickyAvgMuted)} />
+            <SummaryStickySpacer stickyClassName={stickyTotalMuted} />
           </div>
         );
 
@@ -405,12 +508,8 @@ export function SummaryTable({
                 <div key={key} className={CYCLE_WIDTH} />
               ))}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
-              )}
-            />
+            <SummaryStickySpacer stickyClassName={cn("sticky", stickyAvgCell)} />
+            <SummaryStickySpacer stickyClassName={stickyTotalCell} />
           </div>
         );
 
@@ -424,7 +523,7 @@ export function SummaryTable({
             : 0;
 
         return (
-          <div key={`row-${index}`} className={ROW_BASE_TALL}>
+          <div key={`row-${index}`} className={ROW_BASE}>
             <div
               className={cn(
                 CATEGORY_WIDTH,
@@ -446,19 +545,7 @@ export function SummaryTable({
                 renderCycleAmount(row.amounts[key], row.type, key),
               )}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-card/95 px-3 text-right text-sm font-medium tabular-nums backdrop-blur-sm",
-              )}
-            >
-              {formatRowSummary(
-                rowTotal,
-                row.type,
-                rowTotalPercentage,
-                cycleKeys.length,
-              )}
-            </div>
+            {renderCategorySummaryCells(rowTotal, row.type, rowTotalPercentage)}
           </div>
         );
       }
@@ -467,7 +554,7 @@ export function SummaryTable({
         return (
           <div
             key={`row-${index}`}
-            className={cn(ROW_BASE_TALL, "bg-muted/30 hover:bg-muted/30")}
+            className={cn(ROW_BASE, "bg-muted/30 hover:bg-muted/30")}
           >
             <div
               className={cn(
@@ -490,14 +577,12 @@ export function SummaryTable({
                 </div>
               ))}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/80 px-3 text-right backdrop-blur-sm",
-              )}
-            >
-              {formatGrandSummary(grandIncomeTotal, cycleKeys.length, "income")}
-            </div>
+            {renderGrandSummaryCells(
+              grandIncomeTotal,
+              "income",
+              stickyAvgFooter,
+              stickyTotalFooter,
+            )}
           </div>
         );
 
@@ -505,7 +590,7 @@ export function SummaryTable({
         return (
           <div
             key={`row-${index}`}
-            className={cn(ROW_BASE_TALL, "bg-muted/30 hover:bg-muted/30")}
+            className={cn(ROW_BASE, "bg-muted/30 hover:bg-muted/30")}
           >
             <div
               className={cn(
@@ -528,14 +613,12 @@ export function SummaryTable({
                 </div>
               ))}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/80 px-3 text-right backdrop-blur-sm",
-              )}
-            >
-              {formatGrandSummary(grandExpenseTotal, cycleKeys.length, "expense")}
-            </div>
+            {renderGrandSummaryCells(
+              grandExpenseTotal,
+              "expense",
+              stickyAvgFooter,
+              stickyTotalFooter,
+            )}
           </div>
         );
 
@@ -543,10 +626,7 @@ export function SummaryTable({
         return (
           <div
             key={`row-${index}`}
-            className={cn(
-              ROW_BASE_TALL,
-              "bg-muted/50 hover:bg-muted/50 dark:bg-muted/35",
-            )}
+            className={cn(ROW_BASE, "bg-muted/50 hover:bg-muted/50 dark:bg-muted/35")}
           >
             <div
               className={cn(
@@ -574,14 +654,12 @@ export function SummaryTable({
                 );
               })}
             </div>
-            <div
-              className={cn(
-                TOTAL_WIDTH,
-                "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/50 px-3 text-right backdrop-blur-sm dark:bg-muted/35",
-              )}
-            >
-              {formatGrandSummary(grandNetTotal, cycleKeys.length, "net")}
-            </div>
+            {renderGrandSummaryCells(
+              grandNetTotal,
+              "net",
+              stickyAvgNet,
+              stickyTotalNet,
+            )}
           </div>
         );
     }
