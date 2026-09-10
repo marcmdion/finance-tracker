@@ -23,6 +23,8 @@ interface TransactionFormProps {
   onSubmit: (formData: TransactionFormData) => Promise<void>;
   onCancelEdit: () => void;
   initialFormData?: TransactionFormData;
+  variant?: "panel" | "plain";
+  fieldIdPrefix?: string;
 }
 
 function createInitialForm(date?: string): TransactionFormData {
@@ -42,6 +44,8 @@ export function TransactionForm({
   onSubmit,
   onCancelEdit,
   initialFormData,
+  variant = "panel",
+  fieldIdPrefix = "",
 }: TransactionFormProps) {
   const [formData, setFormData] = useState<TransactionFormData>(
     initialFormData ?? createInitialForm(),
@@ -102,23 +106,13 @@ export function TransactionForm({
     onCancelEdit();
   };
 
-  return (
-    <div className="surface p-6 sm:p-7">
-      <div className="mb-6 space-y-1">
-        <p className="label-caps">{editingId ? "Editing" : "New entry"}</p>
-        <h2 className="text-lg font-medium tracking-[-0.02em]">
-          {editingId ? "Update transaction" : "Record transaction"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Categories auto-fill from past merchant names.
-        </p>
-      </div>
-
+  const categoryListId = `${fieldIdPrefix}category-options`;
+  const form = (
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="date" className="label-caps">Date</Label>
+          <Label htmlFor={`${fieldIdPrefix}date`} className="label-caps">Date</Label>
           <Input
-            id="date"
+            id={`${fieldIdPrefix}date`}
             type="date"
             required
             value={formData.date}
@@ -132,7 +126,7 @@ export function TransactionForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="type" className="label-caps">Type</Label>
+          <Label htmlFor={`${fieldIdPrefix}type`} className="label-caps">Type</Label>
           <Select
             value={formData.type}
             onValueChange={(value) =>
@@ -142,7 +136,7 @@ export function TransactionForm({
               }))
             }
           >
-            <SelectTrigger id="type" className="h-10 w-full border-border/60 bg-background/50">
+            <SelectTrigger id={`${fieldIdPrefix}type`} className="h-10 w-full border-border/60 bg-background/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -153,13 +147,13 @@ export function TransactionForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="amount" className="label-caps">Amount</Label>
+          <Label htmlFor={`${fieldIdPrefix}amount`} className="label-caps">Amount</Label>
           <div className="relative">
             <span className="absolute top-2.5 left-3 text-sm text-muted-foreground">
               $
             </span>
             <Input
-              id="amount"
+              id={`${fieldIdPrefix}amount`}
               type="number"
               step="0.01"
               min="0"
@@ -175,9 +169,9 @@ export function TransactionForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name" className="label-caps">Merchant</Label>
+          <Label htmlFor={`${fieldIdPrefix}name`} className="label-caps">Merchant</Label>
           <Input
-            id="name"
+            id={`${fieldIdPrefix}name`}
             type="text"
             required
             placeholder="Netflix, grocery store..."
@@ -188,12 +182,12 @@ export function TransactionForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category" className="label-caps">Category</Label>
+          <Label htmlFor={`${fieldIdPrefix}category`} className="label-caps">Category</Label>
           <Input
-            id="category"
+            id={`${fieldIdPrefix}category`}
             type="text"
             required
-            list="category-options"
+            list={categoryListId}
             placeholder="Select or type new"
             value={formData.category}
             onChange={(e) =>
@@ -201,7 +195,7 @@ export function TransactionForm({
             }
             className="h-10 border-border/60 bg-background/50"
           />
-          <datalist id="category-options">
+          <datalist id={categoryListId}>
             {availableCategories.map((cat) => (
               <option key={cat} value={cat} />
             ))}
@@ -216,7 +210,7 @@ export function TransactionForm({
           >
             {isSubmitting ? "Saving..." : editingId ? "Update" : "Add"}
           </Button>
-          {editingId && (
+          {editingId && variant === "panel" && (
             <Button
               type="button"
               variant="outline"
@@ -229,6 +223,24 @@ export function TransactionForm({
           )}
         </div>
       </form>
+  );
+
+  if (variant === "plain") {
+    return form;
+  }
+
+  return (
+    <div className="surface p-6 sm:p-7">
+      <div className="mb-6 space-y-1">
+        <p className="label-caps">{editingId ? "Editing" : "New entry"}</p>
+        <h2 className="text-lg font-medium tracking-[-0.02em]">
+          {editingId ? "Update transaction" : "Record transaction"}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Categories auto-fill from past merchant names.
+        </p>
+      </div>
+      {form}
     </div>
   );
 }
