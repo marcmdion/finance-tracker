@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatCycleHeaderShort,
   formatCycleLabel,
   formatDisplayDate,
   formatDisplayDateMedium,
@@ -30,6 +31,10 @@ describe("date-utils", () => {
 
   it("formats cycle labels with day before month", () => {
     expect(formatCycleLabel(6, 7, 2026)).toBe("20 Jul – 19 Aug 2026");
+  });
+
+  it("formats short cycle headers for mobile", () => {
+    expect(formatCycleHeaderShort("2026-04")).toBe("Apr '26");
   });
 
   it("formats timestamps in NZ locale", () => {

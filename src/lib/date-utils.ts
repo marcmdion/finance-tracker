@@ -56,6 +56,11 @@ export function formatCycleLabel(
   return `20 ${formatMonthShort(startMonth)} – 19 ${formatMonthShort(endMonth)} ${endYear}`;
 }
 
+export function formatCycleHeaderShort(cycleKey: string): string {
+  const [year, month] = cycleKey.split("-").map(Number);
+  return `${formatMonthShort(month - 1)} '${String(year).slice(-2)}`;
+}
+
 export function getTodayString(): string {
   const today = new Date();
   const year = today.getFullYear();

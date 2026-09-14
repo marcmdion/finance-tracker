@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { CategoryDetailsModal, SummaryData, TransactionType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { formatCycleHeaderShort } from "@/lib/date-utils";
 import {
   formatCurrency,
   formatSignedCurrency,
@@ -39,12 +40,17 @@ type SummaryRow =
   | { kind: "total-expenses" }
   | { kind: "net-balance" };
 
-const CATEGORY_WIDTH = "w-[11.5rem] sm:w-[12.5rem]";
-const SUMMARY_COL_WIDTH = "w-[7.25rem] shrink-0 sm:w-[7.75rem]";
-const CYCLE_WIDTH = "w-[7.25rem] shrink-0 sm:w-[7.75rem]";
-const ROW_BASE = "flex min-h-11 items-center border-b border-border/30";
+const CATEGORY_WIDTH = "w-[8.25rem] shrink-0 sm:w-[11.5rem] md:w-[12.5rem]";
+const SUMMARY_COL_WIDTH = "w-[5.75rem] shrink-0 sm:w-[7.75rem]";
+const CYCLE_WIDTH = "w-[5.75rem] shrink-0 sm:w-[7.75rem]";
+const ROW_BASE =
+  "flex w-max min-w-full flex-nowrap items-center border-b border-border/30 min-h-11";
+const STICKY_LEFT =
+  "sticky left-0 z-20 shrink-0 shadow-[4px_0_8px_-4px_oklch(0.2_0.02_265/0.12)] dark:shadow-[4px_0_8px_-4px_oklch(0_0_0/0.35)]";
+const STICKY_RIGHT =
+  "shadow-[-4px_0_8px_-4px_oklch(0.2_0.02_265/0.12)] dark:shadow-[-4px_0_8px_-4px_oklch(0_0_0/0.35)]";
 
-const AVG_STICKY_OFFSET = "right-[7.25rem] sm:right-[7.75rem]";
+const AVG_STICKY_OFFSET = "right-[5.75rem] sm:right-[7.75rem]";
 
 function sumRowAmounts(
   amounts: Record<string, number>,
@@ -177,6 +183,38 @@ function SummaryStickySpacer({ stickyClassName }: { stickyClassName: string }) {
   return <div className={cn(SUMMARY_COL_WIDTH, stickyClassName)} />;
 }
 
+function CycleSortHeader({
+  cycleKey,
+  label,
+  incomeSort,
+  expenseSort,
+  onSort,
+}: {
+  cycleKey: string;
+  label: string;
+  incomeSort: SortState;
+  expenseSort: SortState;
+  onSort: (next: SortState) => void;
+}) {
+  const active = incomeSort.key === cycleKey || expenseSort.key === cycleKey;
+  const direction =
+    incomeSort.key === cycleKey ? incomeSort.direction : expenseSort.direction;
+
+  return (
+    <div className={cn(CYCLE_WIDTH, "px-2 sm:px-3")}>
+      <button
+        type="button"
+        onClick={() => onSort(nextSortState(incomeSort, cycleKey))}
+        className="label-caps ml-auto flex max-w-full items-center justify-end gap-1 hover:text-foreground"
+      >
+        <span className="truncate sm:hidden">{formatCycleHeaderShort(cycleKey)}</span>
+        <span className="hidden whitespace-nowrap sm:inline">{label}</span>
+        <SortIcon active={active} direction={direction} />
+      </button>
+    </div>
+  );
+}
+
 export function SummaryTable({
   summaryData,
   onCategoryClick,
@@ -267,37 +305,47 @@ export function SummaryTable({
 
   const stickyAvgHeader = cn(
     AVG_STICKY_OFFSET,
+    STICKY_RIGHT,
     "z-20 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
   );
   const stickyTotalHeader = cn(
+    STICKY_RIGHT,
     "sticky right-0 z-20 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
   );
   const stickyAvgCell = cn(
     AVG_STICKY_OFFSET,
+    STICKY_RIGHT,
     "z-10 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
   );
   const stickyTotalCell = cn(
+    STICKY_RIGHT,
     "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-card/95 backdrop-blur-sm",
   );
   const stickyAvgMuted = cn(
     AVG_STICKY_OFFSET,
+    STICKY_RIGHT,
     "z-10 shrink-0 border-l border-border/50 bg-muted/20 backdrop-blur-sm",
   );
   const stickyTotalMuted = cn(
+    STICKY_RIGHT,
     "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/20 backdrop-blur-sm",
   );
   const stickyAvgFooter = cn(
     AVG_STICKY_OFFSET,
+    STICKY_RIGHT,
     "z-10 shrink-0 border-l border-border/50 bg-muted/80 backdrop-blur-sm",
   );
   const stickyTotalFooter = cn(
+    STICKY_RIGHT,
     "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/80 backdrop-blur-sm",
   );
   const stickyAvgNet = cn(
     AVG_STICKY_OFFSET,
+    STICKY_RIGHT,
     "z-10 shrink-0 border-l border-border/50 bg-muted/50 backdrop-blur-sm dark:bg-muted/35",
   );
   const stickyTotalNet = cn(
+    STICKY_RIGHT,
     "sticky right-0 z-10 shrink-0 border-l border-border/50 bg-muted/50 backdrop-blur-sm dark:bg-muted/35",
   );
 
@@ -337,7 +385,7 @@ export function SummaryTable({
     return (
       <div
         key={cycleKey}
-        className={cn(CYCLE_WIDTH, "px-3 text-right text-sm tabular-nums text-muted-foreground")}
+        className={cn(CYCLE_WIDTH, "px-2 text-right text-sm tabular-nums text-muted-foreground sm:px-3")}
       >
         {amount ? (
           <span className="whitespace-nowrap">
@@ -423,7 +471,8 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-20 shrink-0 bg-card/95 px-3 backdrop-blur-sm",
+                STICKY_LEFT,
+                "bg-card/95 px-2 backdrop-blur-sm sm:px-3",
               )}
             >
               <button
@@ -445,27 +494,16 @@ export function SummaryTable({
                 />
               </button>
             </div>
-            <div className="flex min-w-max">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key, label]) => (
-                <div key={key} className={cn(CYCLE_WIDTH, "px-3")}>
-                  <button
-                    type="button"
-                    onClick={() => applySort(nextSortState(incomeSort, key))}
-                    className="label-caps ml-auto flex items-center justify-end gap-1.5 hover:text-foreground"
-                  >
-                    <span>{label}</span>
-                    <SortIcon
-                      active={
-                        incomeSort.key === key || expenseSort.key === key
-                      }
-                      direction={
-                        incomeSort.key === key
-                          ? incomeSort.direction
-                          : expenseSort.direction
-                      }
-                    />
-                  </button>
-                </div>
+                <CycleSortHeader
+                  key={key}
+                  cycleKey={key}
+                  label={label}
+                  incomeSort={incomeSort}
+                  expenseSort={expenseSort}
+                  onSort={applySort}
+                />
               ))}
             </div>
             {renderSummaryHeaders()}
@@ -481,12 +519,13 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-muted/20 px-3 backdrop-blur-sm",
+                STICKY_LEFT,
+                "z-10 bg-muted/20 px-2 backdrop-blur-sm sm:px-3",
               )}
             >
               <span className="label-caps">{row.label}</span>
             </div>
-            <div className="flex min-w-max flex-1">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) => (
                 <div key={key} className={CYCLE_WIDTH} />
               ))}
@@ -502,12 +541,13 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-card/95 px-3 text-sm text-muted-foreground backdrop-blur-sm",
+                STICKY_LEFT,
+                "z-10 bg-card/95 px-2 text-sm text-muted-foreground backdrop-blur-sm sm:px-3",
               )}
             >
               {row.message}
             </div>
-            <div className="flex min-w-max flex-1">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) => (
                 <div key={key} className={CYCLE_WIDTH} />
               ))}
@@ -531,7 +571,8 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-card/95 px-3 font-medium backdrop-blur-sm",
+                STICKY_LEFT,
+                "z-10 bg-card/95 px-2 font-medium backdrop-blur-sm sm:px-3",
               )}
             >
               <Button
@@ -544,7 +585,7 @@ export function SummaryTable({
                 {row.category}
               </Button>
             </div>
-            <div className="flex min-w-max">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) =>
                 renderCycleAmount(row.amounts[key], row.type, key),
               )}
@@ -563,18 +604,19 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-muted/80 px-3 font-medium backdrop-blur-sm",
+                STICKY_LEFT,
+                "z-10 bg-muted/80 px-2 font-medium backdrop-blur-sm sm:px-3",
               )}
             >
               Total income
             </div>
-            <div className="flex min-w-max">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) => (
                 <div
                   key={key}
                   className={cn(
                     CYCLE_WIDTH,
-                    "metric-value-sm px-3 text-right text-emerald-600/90 dark:text-emerald-400/90",
+                    "metric-value-sm px-2 text-right text-emerald-600/90 sm:px-3 dark:text-emerald-400/90",
                   )}
                 >
                   {formatCurrency(summaryData.totals.income[key] || 0)}
@@ -599,18 +641,19 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-muted/80 px-3 font-medium backdrop-blur-sm",
+                STICKY_LEFT,
+                "z-10 bg-muted/80 px-2 font-medium backdrop-blur-sm sm:px-3",
               )}
             >
               Total expenses
             </div>
-            <div className="flex min-w-max">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) => (
                 <div
                   key={key}
                   className={cn(
                     CYCLE_WIDTH,
-                    "metric-value-sm px-3 text-right text-rose-600/90 dark:text-rose-400/90",
+                    "metric-value-sm px-2 text-right text-rose-600/90 sm:px-3 dark:text-rose-400/90",
                   )}
                 >
                   {formatCurrency(summaryData.totals.expense[key] || 0)}
@@ -635,12 +678,13 @@ export function SummaryTable({
             <div
               className={cn(
                 CATEGORY_WIDTH,
-                "sticky left-0 z-10 shrink-0 bg-muted/50 px-3 font-medium backdrop-blur-sm dark:bg-muted/35",
+                STICKY_LEFT,
+                "z-10 bg-muted/50 px-2 font-medium backdrop-blur-sm sm:px-3 dark:bg-muted/35",
               )}
             >
               Net balance
             </div>
-            <div className="flex min-w-max">
+            <div className="flex min-w-max shrink-0">
               {summaryData.cycles.map(([key]) => {
                 const net = roundToCents(summaryData.totals.net[key] || 0);
                 const netIsNegative = isNegativeAmount(net);
@@ -649,7 +693,7 @@ export function SummaryTable({
                     key={key}
                     className={cn(
                       CYCLE_WIDTH,
-                      "metric-value-sm px-3 text-right",
+                      "metric-value-sm px-2 text-right sm:px-3",
                       netIsNegative && "text-destructive",
                       !netIsNegative && "text-emerald-600/90 dark:text-emerald-400/90",
                     )}
@@ -672,13 +716,16 @@ export function SummaryTable({
 
   return (
     <div className="surface">
-      <div className="border-b border-border/50 px-6 py-5">
+      <div className="border-b border-border/50 px-4 py-4 sm:px-6 sm:py-5">
         <p className="label-caps mb-1">Historical view</p>
         <h2 className="text-lg font-medium tracking-[-0.02em]">Summary by cycle</h2>
+        <p className="mt-1 text-xs text-muted-foreground sm:hidden">
+          Swipe sideways to view all cycles
+        </p>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-max">
+      <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+        <div className="min-w-max w-max">
           {rows.map((row, index) => renderRow(row, index))}
         </div>
       </div>
