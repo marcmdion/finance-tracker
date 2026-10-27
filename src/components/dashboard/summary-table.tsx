@@ -4,7 +4,10 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import type { CategoryDetailsModal, SummaryData, TransactionType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { formatCycleHeaderShort } from "@/lib/date-utils";
+import {
+  formatCycleHeaderCompact,
+  formatCycleHeaderShort,
+} from "@/lib/date-utils";
 import {
   formatCurrency,
   formatSignedCurrency,
@@ -42,7 +45,8 @@ type SummaryRow =
 
 const CATEGORY_WIDTH = "w-[8.25rem] shrink-0 sm:w-[11.5rem] md:w-[12.5rem]";
 const SUMMARY_COL_WIDTH = "w-[5.75rem] shrink-0 sm:w-[7.75rem]";
-const CYCLE_WIDTH = "w-[5.75rem] shrink-0 sm:w-[7.75rem]";
+const CYCLE_WIDTH =
+  "w-[5.75rem] shrink-0 sm:w-[9.25rem] md:w-[9.75rem] xl:w-[11.25rem]";
 const ROW_BASE =
   "flex w-max min-w-full flex-nowrap items-center border-b border-border/30 min-h-11";
 const STICKY_LEFT =
@@ -201,14 +205,20 @@ function CycleSortHeader({
     incomeSort.key === cycleKey ? incomeSort.direction : expenseSort.direction;
 
   return (
-    <div className={cn(CYCLE_WIDTH, "px-2 sm:px-3")}>
+    <div className={cn(CYCLE_WIDTH, "overflow-hidden px-2 sm:px-3")}>
       <button
         type="button"
         onClick={() => onSort(nextSortState(incomeSort, cycleKey))}
-        className="label-caps ml-auto flex max-w-full items-center justify-end gap-1 hover:text-foreground"
+        title={label}
+        className="label-caps ml-auto flex w-full min-w-0 items-center justify-end gap-1 hover:text-foreground"
       >
-        <span className="truncate sm:hidden">{formatCycleHeaderShort(cycleKey)}</span>
-        <span className="hidden whitespace-nowrap sm:inline">{label}</span>
+        <span className="min-w-0 truncate sm:hidden">
+          {formatCycleHeaderShort(cycleKey)}
+        </span>
+        <span className="hidden min-w-0 truncate sm:inline xl:hidden">
+          {formatCycleHeaderCompact(cycleKey)}
+        </span>
+        <span className="hidden min-w-0 truncate xl:inline">{label}</span>
         <SortIcon active={active} direction={direction} />
       </button>
     </div>
@@ -467,7 +477,10 @@ export function SummaryTable({
     switch (row.kind) {
       case "header":
         return (
-          <div key={`row-${index}`} className={cn(ROW_BASE, "border-border/40 bg-card/95")}>
+          <div
+            key={`row-${index}`}
+            className={cn(ROW_BASE, "min-h-12 border-border/40 bg-card/95 xl:min-h-11")}
+          >
             <div
               className={cn(
                 CATEGORY_WIDTH,
