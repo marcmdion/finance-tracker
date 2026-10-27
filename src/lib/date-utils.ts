@@ -61,6 +61,20 @@ export function formatCycleHeaderShort(cycleKey: string): string {
   return `${formatMonthShort(month - 1)} '${String(year).slice(-2)}`;
 }
 
+export function formatCycleHeaderCompact(cycleKey: string): string {
+  const [year, month] = cycleKey.split("-").map(Number);
+  const startMonth = month - 1;
+  let endMonth = startMonth + 1;
+  let endYear = year;
+
+  if (endMonth > 11) {
+    endMonth = 0;
+    endYear += 1;
+  }
+
+  return `20 ${formatMonthShort(startMonth)} – 19 ${formatMonthShort(endMonth)} '${String(endYear).slice(-2)}`;
+}
+
 export function getTodayString(): string {
   const today = new Date();
   const year = today.getFullYear();
